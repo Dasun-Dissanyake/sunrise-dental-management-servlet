@@ -147,7 +147,7 @@
                 Register and manage patient appointments.
             </p>
 
-            <a href="#">
+            <a href="<%= request.getContextPath() %>/appointments">
                 Manage Appointments →
             </a>
 

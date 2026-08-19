@@ -10,39 +10,34 @@ import java.util.List;
 
 public class DentistDAO {
 
-public boolean save(Dentist dentist) {
-    String sql = """
-            INSERT INTO dentists
-            (dentist_number, full_name, specialization, contact_number, created_at, active)
-            VALUES (?, ?, ?, ?, ?, ?)
-            """;
+    public boolean save(Dentist dentist) throws SQLException {
+        String sql = """
+                INSERT INTO dentists
+                (dentist_number, full_name, specialization, contact_number, created_at, active)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """;
 
-    try (Connection connection = DatabaseConnection.getConnection();
-         PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
-        statement.setString(1, dentist.getDentistNumber());
-        statement.setString(2, dentist.getFullName());
-        statement.setString(3, dentist.getSpecialization());
-        statement.setString(4, dentist.getContactNumber());
+            statement.setString(1, dentist.getDentistNumber());
+            statement.setString(2, dentist.getFullName());
+            statement.setString(3, dentist.getSpecialization());
+            statement.setString(4, dentist.getContactNumber());
 
-        LocalDateTime createdAt = dentist.getCreatedAt();
+            LocalDateTime createdAt = dentist.getCreatedAt();
+            if (createdAt == null) {
+                createdAt = LocalDateTime.now();
+            }
 
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
+            statement.setTimestamp(5, Timestamp.valueOf(createdAt));
+            statement.setBoolean(6, dentist.isActive());
+
+            return statement.executeUpdate() > 0;
         }
-
-        statement.setTimestamp(5, Timestamp.valueOf(createdAt));
-        statement.setBoolean(6, dentist.isActive());
-
-        return statement.executeUpdate() > 0;
-
-    } catch (SQLException e) {
-        e.printStackTrace();
-        return false;
     }
-}
 
-    public Dentist findById(Long id) {
+    public Dentist findById(Long id) throws SQLException {
         String sql = "SELECT * FROM dentists WHERE id = ?";
 
         try (Connection connection = DatabaseConnection.getConnection();
@@ -55,16 +50,18 @@ public boolean save(Dentist dentist) {
                     return mapResultSetToDentist(resultSet);
                 }
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
 
         return null;
     }
 
-    public Dentist findByDentistNumber(String dentistNumber) {
-        String sql = "SELECT * FROM dentists WHERE dentist_number = ?";
+    public Dentist findByDentistNumber(String dentistNumber) throws SQLException {
+        String sql = """
+                SELECT *
+                FROM dentists
+                WHERE dentist_number = ?
+                AND active = true
+                """;
 
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -76,18 +73,20 @@ public boolean save(Dentist dentist) {
                     return mapResultSetToDentist(resultSet);
                 }
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
 
         return null;
     }
 
-    public List<Dentist> findAll() {
+    public List<Dentist> findAll() throws SQLException {
         List<Dentist> dentists = new ArrayList<>();
 
-        String sql = "SELECT * FROM dentists ORDER BY id DESC";
+        String sql = """
+                SELECT *
+                FROM dentists
+                WHERE active = true
+                ORDER BY full_name
+                """;
 
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
@@ -96,15 +95,12 @@ public boolean save(Dentist dentist) {
             while (resultSet.next()) {
                 dentists.add(mapResultSetToDentist(resultSet));
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
 
         return dentists;
     }
 
-    public boolean update(Dentist dentist) {
+    public boolean update(Dentist dentist) throws SQLException {
         String sql = """
                 UPDATE dentists
                 SET full_name = ?,
@@ -122,14 +118,10 @@ public boolean save(Dentist dentist) {
             statement.setLong(4, dentist.getId());
 
             return statement.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 
-    public boolean deactivate(Long id) {
+    public boolean deactivate(Long id) throws SQLException {
         String sql = "UPDATE dentists SET active = false WHERE id = ?";
 
         try (Connection connection = DatabaseConnection.getConnection();
@@ -138,10 +130,6 @@ public boolean save(Dentist dentist) {
             statement.setLong(1, id);
 
             return statement.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 

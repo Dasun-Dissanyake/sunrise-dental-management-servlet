@@ -72,7 +72,7 @@
 
         .cards {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
         }
 
@@ -162,9 +162,24 @@
                 View and manage patient information.
             </p>
 
-<a href="<%= request.getContextPath() %>/patients">
-    Manage Patients →
-</a>
+            <a href="<%= request.getContextPath() %>/patients">
+                Manage Patients →
+            </a>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Dentists</h3>
+
+            <p>
+                View and manage dentist information.
+            </p>
+
+            <a href="<%= request.getContextPath() %>/dentists">
+                Manage Dentists →
+            </a>
 
         </div>
 

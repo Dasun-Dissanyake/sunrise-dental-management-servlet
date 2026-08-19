@@ -3,6 +3,8 @@ package com.sunrisedental.service;
 import com.sunrisedental.dao.DentistDAO;
 import com.sunrisedental.model.Dentist;
 
+import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class DentistService {
@@ -18,6 +20,33 @@ public class DentistService {
     }
 
     /**
+     * Validates required dentist fields and throws IllegalArgumentException if invalid.
+     *
+     * @param dentist dentist object to validate
+     */
+    public void validateDentist(Dentist dentist) {
+        if (dentist == null) {
+            throw new IllegalArgumentException("Dentist information is required.");
+        }
+
+        if (dentist.getDentistNumber() == null || dentist.getDentistNumber().isBlank()) {
+            throw new IllegalArgumentException("Dentist number is required.");
+        }
+
+        if (dentist.getFullName() == null || dentist.getFullName().isBlank()) {
+            throw new IllegalArgumentException("Dentist name is required.");
+        }
+
+        if (dentist.getSpecialization() == null || dentist.getSpecialization().isBlank()) {
+            throw new IllegalArgumentException("Specialization is required.");
+        }
+
+        if (dentist.getContactNumber() == null || dentist.getContactNumber().isBlank()) {
+            throw new IllegalArgumentException("Contact number is required.");
+        }
+    }
+
+    /**
      * Validates the required dentist information.
      *
      * @param dentist dentist object to validate
@@ -28,27 +57,19 @@ public class DentistService {
             return false;
         }
 
-        // Dentist number is required
-        if (dentist.getDentistNumber() == null ||
-                dentist.getDentistNumber().isBlank()) {
+        if (dentist.getDentistNumber() == null || dentist.getDentistNumber().isBlank()) {
             return false;
         }
 
-        // Full name is required
-        if (dentist.getFullName() == null ||
-                dentist.getFullName().isBlank()) {
+        if (dentist.getFullName() == null || dentist.getFullName().isBlank()) {
             return false;
         }
 
-        // Specialization is required
-        if (dentist.getSpecialization() == null ||
-                dentist.getSpecialization().isBlank()) {
+        if (dentist.getSpecialization() == null || dentist.getSpecialization().isBlank()) {
             return false;
         }
 
-        // Contact number is required
-        if (dentist.getContactNumber() == null ||
-                dentist.getContactNumber().isBlank()) {
+        if (dentist.getContactNumber() == null || dentist.getContactNumber().isBlank()) {
             return false;
         }
 
@@ -61,10 +82,13 @@ public class DentistService {
      * @param dentist dentist to add
      * @return true if the dentist was successfully added
      */
-    public boolean addDentist(Dentist dentist) {
-        if (!isValidDentist(dentist)) {
-            return false;
+    public boolean addDentist(Dentist dentist) throws SQLException {
+        validateDentist(dentist);
+
+        if (dentist.getCreatedAt() == null) {
+            dentist.setCreatedAt(LocalDateTime.now());
         }
+        dentist.setActive(true);
 
         return dentistDAO.save(dentist);
     }
@@ -75,7 +99,7 @@ public class DentistService {
      * @param id dentist ID
      * @return dentist if found, otherwise null
      */
-    public Dentist getDentistById(Long id) {
+    public Dentist getDentistById(Long id) throws SQLException {
         if (id == null || id <= 0) {
             return null;
         }
@@ -84,25 +108,25 @@ public class DentistService {
     }
 
     /**
-     * Retrieves a dentist by dentist number.
+     * Retrieves an active dentist by dentist number.
      *
      * @param dentistNumber dentist number
      * @return dentist if found, otherwise null
      */
-    public Dentist getDentistByNumber(String dentistNumber) {
-        if (dentistNumber == null || dentistNumber.isBlank()) {
-            return null;
+    public Dentist getDentistByNumber(String dentistNumber) throws SQLException {
+        if (dentistNumber == null || dentistNumber.trim().isEmpty()) {
+            throw new IllegalArgumentException("Dentist number is required.");
         }
 
-        return dentistDAO.findByDentistNumber(dentistNumber);
+        return dentistDAO.findByDentistNumber(dentistNumber.trim());
     }
 
     /**
-     * Retrieves all dentists.
+     * Retrieves all active dentists.
      *
-     * @return list of dentists
+     * @return list of active dentists
      */
-    public List<Dentist> getAllDentists() {
+    public List<Dentist> getAllDentists() throws SQLException {
         return dentistDAO.findAll();
     }
 
@@ -112,26 +136,21 @@ public class DentistService {
      * @param dentist dentist information to update
      * @return true if the dentist was successfully updated
      */
-    public boolean updateDentist(Dentist dentist) {
-        if (dentist == null || dentist.getId() == null ||
-                dentist.getId() <= 0) {
-            return false;
+    public boolean updateDentist(Dentist dentist) throws SQLException {
+        if (dentist == null || dentist.getId() == null || dentist.getId() <= 0) {
+            throw new IllegalArgumentException("Valid dentist ID is required.");
         }
 
-        // For an update, validate the required fields.
-        if (dentist.getFullName() == null ||
-                dentist.getFullName().isBlank()) {
-            return false;
+        if (dentist.getFullName() == null || dentist.getFullName().isBlank()) {
+            throw new IllegalArgumentException("Dentist name is required.");
         }
 
-        if (dentist.getSpecialization() == null ||
-                dentist.getSpecialization().isBlank()) {
-            return false;
+        if (dentist.getSpecialization() == null || dentist.getSpecialization().isBlank()) {
+            throw new IllegalArgumentException("Specialization is required.");
         }
 
-        if (dentist.getContactNumber() == null ||
-                dentist.getContactNumber().isBlank()) {
-            return false;
+        if (dentist.getContactNumber() == null || dentist.getContactNumber().isBlank()) {
+            throw new IllegalArgumentException("Contact number is required.");
         }
 
         return dentistDAO.update(dentist);
@@ -143,9 +162,9 @@ public class DentistService {
      * @param id dentist ID
      * @return true if successfully deactivated
      */
-    public boolean deactivateDentist(Long id) {
+    public boolean deactivateDentist(Long id) throws SQLException {
         if (id == null || id <= 0) {
-            return false;
+            throw new IllegalArgumentException("Valid dentist ID is required.");
         }
 
         return dentistDAO.deactivate(id);

@@ -183,6 +183,16 @@
 
         </div>
 
+        <div class="card">
+    <h3>Treatments</h3>
+    <p>
+        View and manage available dental treatments.
+    </p>
+    <a href="<%= request.getContextPath() %>/treatments">
+        Manage Treatments →
+    </a>
+</div>
+
 
         <div class="card">
 

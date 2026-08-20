@@ -1,3 +1,4 @@
+
 package com.sunrisedental.dao;
 
 import com.sunrisedental.model.Patient;
@@ -77,6 +78,38 @@ public class PatientDAO {
         return patients;
     }
 
+    public Patient findById(Long id) throws SQLException {
+
+        if (id == null || id <= 0) {
+            return null;
+        }
+
+        String sql = """
+                SELECT *
+                FROM patients
+                WHERE id = ?
+                AND active = true
+                """;
+
+        try (Connection connection =
+                     DatabaseConnection.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setLong(1, id);
+
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
+
+                if (resultSet.next()) {
+                    return mapPatient(resultSet);
+                }
+            }
+        }
+
+        return null;
+    }
+
     public Patient findByPatientNumber(
             String patientNumber) throws SQLException {
 
@@ -111,21 +144,28 @@ public class PatientDAO {
 
         Patient patient = new Patient();
 
-        patient.setId(resultSet.getLong("id"));
+        patient.setId(
+                resultSet.getLong("id")
+        );
+
         patient.setPatientNumber(
                 resultSet.getString("patient_number")
         );
+
         patient.setFullName(
                 resultSet.getString("full_name")
         );
+
         patient.setAddress(
                 resultSet.getString("address")
         );
+
         patient.setContactNumber(
                 resultSet.getString("contact_number")
         );
 
-        Date dob = resultSet.getDate("date_of_birth");
+        Date dob =
+                resultSet.getDate("date_of_birth");
 
         if (dob != null) {
             patient.setDateOfBirth(
@@ -142,7 +182,9 @@ public class PatientDAO {
         );
 
         Timestamp registrationDate =
-                resultSet.getTimestamp("registration_date");
+                resultSet.getTimestamp(
+                        "registration_date"
+                );
 
         if (registrationDate != null) {
             patient.setRegistrationDate(
@@ -157,3 +199,4 @@ public class PatientDAO {
         return patient;
     }
 }
+

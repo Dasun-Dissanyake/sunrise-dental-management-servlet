@@ -1,17 +1,32 @@
+
 <%@ page contentType="text/html;charset=UTF-8" %>
+
 <%@ page import="com.sunrisedental.model.Bill" %>
 <%@ page import="com.sunrisedental.model.Appointment" %>
 <%@ page import="com.sunrisedental.model.Treatment" %>
+<%@ page import="com.sunrisedental.model.Patient" %>
 
 <%
-    Bill searchedBill = (Bill) request.getAttribute("searchedBill");
-    Appointment appointment = (Appointment) request.getAttribute("appointment");
-    Treatment treatment = (Treatment) request.getAttribute("treatment");
+    Bill searchedBill =
+            (Bill) request.getAttribute("searchedBill");
 
-    String error = (String) request.getAttribute("error");
+    Appointment appointment =
+            (Appointment) request.getAttribute("appointment");
 
-    String successParam = request.getParameter("success");
-    String errorParam = request.getParameter("error");
+    Treatment treatment =
+            (Treatment) request.getAttribute("treatment");
+
+    Patient patient =
+            (Patient) request.getAttribute("patient");
+
+    String error =
+            (String) request.getAttribute("error");
+
+    String successParam =
+            request.getParameter("success");
+
+    String errorParam =
+            request.getParameter("error");
 
     String successMessage = null;
 
@@ -29,15 +44,21 @@
 %>
 
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0">
 
     <title>Billing - Sunrise Dental</title>
 
     <style>
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -49,6 +70,10 @@
             background: #f5f7fb;
             color: #333;
         }
+
+        /* =========================
+           NORMAL PAGE
+           ========================= */
 
         .header {
             background: #ffffff;
@@ -169,7 +194,10 @@
 
         .details-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(
+                    auto-fit,
+                    minmax(220px, 1fr)
+            );
             gap: 15px;
         }
 
@@ -254,29 +282,163 @@
             font-weight: bold;
         }
 
+        /* =========================
+           PRINT RECEIPT
+           ========================= */
+
+        .print-receipt {
+            display: none;
+        }
+
         @media print {
 
-            .header,
-            .search-card,
-            .bill-actions,
-            .page-header {
-                display: none;
+            @page {
+                size: A4;
+                margin: 15mm;
             }
 
             body {
                 background: white;
+                color: #000;
+                font-family: Arial, sans-serif;
+            }
+
+            .header,
+            .page-header,
+            .search-card,
+            .screen-content {
+                display: none !important;
             }
 
             .container {
                 max-width: 100%;
                 padding: 0;
+                margin: 0;
             }
 
-            .card {
-                border: none;
+            .print-receipt {
+                display: block;
+                width: 100%;
+                max-width: 800px;
+                margin: 0 auto;
+            }
+
+            .print-header {
+                text-align: center;
+                padding-bottom: 18px;
+                border-bottom: 2px solid #000;
+                margin-bottom: 20px;
+            }
+
+            .print-header h1 {
+                font-size: 28px;
+                margin-bottom: 6px;
+                letter-spacing: 1px;
+            }
+
+            .print-header p {
+                font-size: 13px;
+                margin-bottom: 3px;
+            }
+
+            .receipt-title {
+                text-align: center;
+                margin: 20px 0;
+            }
+
+            .receipt-title h2 {
+                font-size: 20px;
+                letter-spacing: 1px;
+            }
+
+            .receipt-meta {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px 30px;
+                margin-bottom: 22px;
+                font-size: 13px;
+            }
+
+            .receipt-section {
+                margin-bottom: 22px;
+            }
+
+            .receipt-section h3 {
+                font-size: 14px;
+                text-transform: uppercase;
+                border-bottom: 1px solid #000;
+                padding-bottom: 6px;
+                margin-bottom: 10px;
+            }
+
+            .receipt-details {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 7px 30px;
+                font-size: 13px;
+            }
+
+            .receipt-detail {
+                display: flex;
+                justify-content: space-between;
+                gap: 15px;
+            }
+
+            .receipt-detail span:first-child {
+                font-weight: bold;
+            }
+
+            .receipt-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            }
+
+            .receipt-table th {
+                text-align: left;
+                padding: 9px 5px;
+                border-top: 1px solid #000;
+                border-bottom: 1px solid #000;
+                font-size: 13px;
+            }
+
+            .receipt-table th:last-child,
+            .receipt-table td:last-child {
+                text-align: right;
+            }
+
+            .receipt-table td {
+                padding: 10px 5px;
+                border-bottom: 1px solid #ddd;
+                font-size: 13px;
+            }
+
+            .receipt-total td {
+                border-top: 2px solid #000;
+                border-bottom: none;
+                font-size: 16px;
+                font-weight: bold;
+                padding-top: 14px;
+            }
+
+            .receipt-footer {
+                text-align: center;
+                margin-top: 35px;
+                padding-top: 15px;
+                border-top: 1px solid #000;
+                font-size: 12px;
+                line-height: 1.6;
+            }
+
+            .receipt-footer .thank-you {
+                font-weight: bold;
+                font-size: 13px;
+                margin-bottom: 5px;
             }
         }
+
     </style>
+
 </head>
 
 <body>
@@ -289,13 +451,15 @@
 
     <div class="header-links">
 
-        <a class="back-link"
-           href="<%= request.getContextPath() %>/dashboard">
+        <a
+                class="back-link"
+                href="<%= request.getContextPath() %>/dashboard">
             Dashboard
         </a>
 
-        <a class="logout"
-           href="<%= request.getContextPath() %>/logout">
+        <a
+                class="logout"
+                href="<%= request.getContextPath() %>/logout">
             Logout
         </a>
 
@@ -303,370 +467,839 @@
 
 </header>
 
+
 <main class="container">
 
-    <section class="page-header">
+    <!-- =========================
+         NORMAL SCREEN CONTENT
+         ========================= -->
 
-        <h1>Billing</h1>
+    <div class="screen-content">
 
-        <p>
-            Generate and manage patient bills.
-        </p>
+        <section class="page-header">
 
-    </section>
+            <h1>Billing</h1>
 
-    <% if (successMessage != null) { %>
-
-        <div class="message success">
-            <%= successMessage %>
-        </div>
-
-    <% } %>
-
-    <% if (error != null) { %>
-
-        <div class="message error">
-            <%= error %>
-        </div>
-
-    <% } %>
-
-
-    <!-- SEARCH -->
-
-    <section class="card search-card">
-
-        <h2>Search Bill</h2>
-
-        <form class="search-form"
-              method="get"
-              action="<%= request.getContextPath() %>/bills">
-
-            <input
-                    type="text"
-                    name="billNumber"
-                    placeholder="Enter Bill Number">
-
-            <button
-                    type="submit"
-                    class="btn-primary">
-                Search Bill
-            </button>
-
-        </form>
-
-        <br>
-
-        <form class="search-form"
-              method="get"
-              action="<%= request.getContextPath() %>/bills">
-
-            <input
-                    type="number"
-                    name="appointmentId"
-                    placeholder="Enter Appointment ID"
-                    min="1">
-
-            <button
-                    type="submit"
-                    class="btn-secondary">
-                Find Appointment
-            </button>
-
-        </form>
-
-    </section>
-
-
-    <!-- EXISTING BILL -->
-
-    <% if (searchedBill != null) { %>
-
-        <section class="card">
-
-            <div class="bill-header">
-
-                <div>
-                    <h2>Bill Details</h2>
-
-                    <div class="bill-number">
-                        <%= searchedBill.getBillNumber() %>
-                    </div>
-                </div>
-
-                <button
-                        type="button"
-                        class="btn-print"
-                        onclick="window.print()">
-                    Print Bill
-                </button>
-
-            </div>
-
-            <div class="details-grid">
-
-                <div class="detail">
-
-                    <div class="detail-label">
-                        Bill Number
-                    </div>
-
-                    <div class="detail-value">
-                        <%= searchedBill.getBillNumber() %>
-                    </div>
-
-                </div>
-
-                <div class="detail">
-
-                    <div class="detail-label">
-                        Bill Date
-                    </div>
-
-                    <div class="detail-value">
-                        <%= searchedBill.getBillDate() %>
-                    </div>
-
-                </div>
-
-                <div class="detail">
-
-                    <div class="detail-label">
-                        Appointment ID
-                    </div>
-
-                    <div class="detail-value">
-                        <%= searchedBill.getAppointmentId() %>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <table class="amount-table">
-
-                <tr>
-                    <td>Consultation Fee</td>
-                    <td>
-                        Rs. <%= String.format(
-                                "%.2f",
-                                searchedBill.getConsultationFee()
-                        ) %>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>Treatment Cost</td>
-                    <td>
-                        Rs. <%= String.format(
-                                "%.2f",
-                                searchedBill.getTreatmentCost()
-                        ) %>
-                    </td>
-                </tr>
-
-                <tr class="total-row">
-                    <td>Total Amount</td>
-                    <td>
-                        Rs. <%= String.format(
-                                "%.2f",
-                                searchedBill.getTotalAmount()
-                        ) %>
-                    </td>
-                </tr>
-
-            </table>
+            <p>
+                Generate and manage patient bills.
+            </p>
 
         </section>
 
-    <% } %>
+
+        <% if (successMessage != null) { %>
+
+            <div class="message success">
+                <%= successMessage %>
+            </div>
+
+        <% } %>
 
 
-    <!-- APPOINTMENT -->
+        <% if (error != null) { %>
 
-    <% if (appointment != null && searchedBill == null) { %>
+            <div class="message error">
+                <%= error %>
+            </div>
 
-        <section class="card">
+        <% } %>
 
-            <h2>Appointment Details</h2>
 
-            <div class="details-grid">
+        <!-- SEARCH -->
 
-                <div class="detail">
+        <section class="card search-card">
 
-                    <div class="detail-label">
-                        Appointment Number
+            <h2>Search Bill</h2>
+
+            <form
+                    class="search-form"
+                    method="get"
+                    action="<%= request.getContextPath() %>/bills">
+
+                <input
+                        type="text"
+                        name="billNumber"
+                        placeholder="Enter Bill Number">
+
+                <button
+                        type="submit"
+                        class="btn-primary">
+                    Search Bill
+                </button>
+
+            </form>
+
+            <br>
+
+            <form
+                    class="search-form"
+                    method="get"
+                    action="<%= request.getContextPath() %>/bills">
+
+                <input
+                        type="number"
+                        name="appointmentId"
+                        placeholder="Enter Appointment ID"
+                        min="1">
+
+                <button
+                        type="submit"
+                        class="btn-secondary">
+                    Find Appointment
+                </button>
+
+            </form>
+
+        </section>
+
+
+        <!-- EXISTING BILL -->
+
+        <% if (searchedBill != null) { %>
+
+            <section class="card">
+
+                <div class="bill-header">
+
+                    <div>
+
+                        <h2>Bill Details</h2>
+
+                        <div class="bill-number">
+                            <%= searchedBill.getBillNumber() %>
+                        </div>
+
                     </div>
 
-                    <div class="detail-value">
-                        <%= appointment.getAppointmentNumber() %>
+                    <button
+                            type="button"
+                            class="btn-print"
+                            onclick="window.print()">
+                        Print Bill
+                    </button>
+
+                </div>
+
+
+                <% if (patient != null) { %>
+
+                    <div class="details-grid">
+
+                        <div class="detail">
+
+                            <div class="detail-label">
+                                Patient Name
+                            </div>
+
+                            <div class="detail-value">
+                                <%= patient.getFullName() %>
+                            </div>
+
+                        </div>
+
+
+                        <div class="detail">
+
+                            <div class="detail-label">
+                                Patient Number
+                            </div>
+
+                            <div class="detail-value">
+                                <%= patient.getPatientNumber() %>
+                            </div>
+
+                        </div>
+
+
+                        <div class="detail">
+
+                            <div class="detail-label">
+                                Contact Number
+                            </div>
+
+                            <div class="detail-value">
+                                <%= patient.getContactNumber() %>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <br>
+
+                <% } %>
+
+
+                <div class="details-grid">
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Bill Number
+                        </div>
+
+                        <div class="detail-value">
+                            <%= searchedBill.getBillNumber() %>
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Bill Date
+                        </div>
+
+                        <div class="detail-value">
+                            <%= searchedBill.getBillDate() %>
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Appointment ID
+                        </div>
+
+                        <div class="detail-value">
+                            <%= searchedBill.getAppointmentId() %>
+                        </div>
+
                     </div>
 
                 </div>
 
-                <div class="detail">
 
-                    <div class="detail-label">
-                        Appointment Date
+                <table class="amount-table">
+
+                    <tr>
+
+                        <td>
+                            Consultation Fee
+                        </td>
+
+                        <td>
+                            Rs.
+                            <%= String.format(
+                                    "%.2f",
+                                    searchedBill.getConsultationFee()
+                            ) %>
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Treatment Cost
+                        </td>
+
+                        <td>
+                            Rs.
+                            <%= String.format(
+                                    "%.2f",
+                                    searchedBill.getTreatmentCost()
+                            ) %>
+                        </td>
+
+                    </tr>
+
+
+                    <tr class="total-row">
+
+                        <td>
+                            Total Amount
+                        </td>
+
+                        <td>
+                            Rs.
+                            <%= String.format(
+                                    "%.2f",
+                                    searchedBill.getTotalAmount()
+                            ) %>
+                        </td>
+
+                    </tr>
+
+                </table>
+
+            </section>
+
+        <% } %>
+
+
+        <!-- APPOINTMENT -->
+
+        <% if (appointment != null && searchedBill == null) { %>
+
+            <section class="card">
+
+                <h2>Appointment Details</h2>
+
+                <div class="details-grid">
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Appointment Number
+                        </div>
+
+                        <div class="detail-value">
+                            <%= appointment.getAppointmentNumber() %>
+                        </div>
+
                     </div>
 
-                    <div class="detail-value">
-                        <%= appointment.getAppointmentDate() %>
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Appointment Date
+                        </div>
+
+                        <div class="detail-value">
+                            <%= appointment.getAppointmentDate() %>
+                        </div>
+
                     </div>
+
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Appointment Time
+                        </div>
+
+                        <div class="detail-value">
+                            <%= appointment.getAppointmentTime() %>
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Status
+                        </div>
+
+                        <div class="detail-value">
+                            <%= appointment.getStatus() %>
+                        </div>
+
+                    </div>
+
+
+                    <% if (patient != null) { %>
+
+                        <div class="detail">
+
+                            <div class="detail-label">
+                                Patient Name
+                            </div>
+
+                            <div class="detail-value">
+                                <%= patient.getFullName() %>
+                            </div>
+
+                        </div>
+
+                    <% } %>
+
+
+                    <% if (treatment != null) { %>
+
+                        <div class="detail">
+
+                            <div class="detail-label">
+                                Treatment
+                            </div>
+
+                            <div class="detail-value">
+                                <%= treatment.getTreatmentName() %>
+                            </div>
+
+                        </div>
+
+
+                        <div class="detail">
+
+                            <div class="detail-label">
+                                Treatment Code
+                            </div>
+
+                            <div class="detail-value">
+                                <%= treatment.getTreatmentCode() %>
+                            </div>
+
+                        </div>
+
+                    <% } %>
 
                 </div>
 
-                <div class="detail">
+            </section>
 
-                    <div class="detail-label">
-                        Appointment Time
-                    </div>
 
-                    <div class="detail-value">
-                        <%= appointment.getAppointmentTime() %>
-                    </div>
+            <!-- GENERATE BILL -->
 
-                </div>
+            <section class="card">
 
-                <div class="detail">
-
-                    <div class="detail-label">
-                        Status
-                    </div>
-
-                    <div class="detail-value">
-                        <%= appointment.getStatus() %>
-                    </div>
-
-                </div>
+                <h2>Generate Bill</h2>
 
                 <% if (treatment != null) { %>
 
-                    <div class="detail">
+                    <table class="amount-table">
 
-                        <div class="detail-label">
-                            Treatment
+                        <tr>
+
+                            <td>
+                                Consultation Fee
+                            </td>
+
+                            <td>
+                                Rs.
+                                <%= String.format(
+                                        "%.2f",
+                                        treatment.getConsultationFee()
+                                ) %>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Treatment Cost
+                            </td>
+
+                            <td>
+                                Rs.
+                                <%= String.format(
+                                        "%.2f",
+                                        treatment.getTreatmentCost()
+                                ) %>
+                            </td>
+
+                        </tr>
+
+
+                        <tr class="total-row">
+
+                            <td>
+                                Total Amount
+                            </td>
+
+                            <td>
+                                Rs.
+                                <%= String.format(
+                                        "%.2f",
+                                        treatment.getConsultationFee()
+                                                + treatment.getTreatmentCost()
+                                ) %>
+                            </td>
+
+                        </tr>
+
+                    </table>
+
+
+                    <form
+                            class="bill-form"
+                            method="post"
+                            action="<%= request.getContextPath() %>/bills">
+
+                        <input
+                                type="hidden"
+                                name="action"
+                                value="generate">
+
+                        <input
+                                type="hidden"
+                                name="appointmentId"
+                                value="<%= appointment.getId() %>">
+
+
+                        <div class="form-group">
+
+                            <label for="billNumber">
+                                Bill Number
+                            </label>
+
+                            <input
+                                    type="text"
+                                    id="billNumber"
+                                    name="billNumber"
+                                    placeholder="e.g. REC-000001"
+                                    maxlength="20"
+                                    required>
+
                         </div>
 
-                        <div class="detail-value">
-                            <%= treatment.getTreatmentName() %>
+
+                        <div class="bill-actions">
+
+                            <button
+                                    type="submit"
+                                    class="btn-primary">
+                                Generate Bill
+                            </button>
+
                         </div>
 
-                    </div>
+                    </form>
 
-                    <div class="detail">
+                <% } else { %>
 
-                        <div class="detail-label">
-                            Treatment Code
-                        </div>
+                    <div class="message error">
 
-                        <div class="detail-value">
-                            <%= treatment.getTreatmentCode() %>
-                        </div>
+                        Treatment information could not be loaded
+                        for this appointment.
 
                     </div>
 
                 <% } %>
 
+            </section>
+
+        <% } %>
+
+    </div>
+
+
+    <!-- =========================
+         PRINTABLE RECEIPT
+         ========================= -->
+
+    <% if (searchedBill != null) { %>
+
+        <section class="print-receipt">
+
+            <!-- HEADER -->
+
+            <div class="print-header">
+
+                <h1>
+                    SUNRISE DENTAL
+                </h1>
+
+                <p>
+                    Dental Care &amp; Treatment Center
+                </p>
+
+                <p>
+                    Colombo, Sri Lanka
+                </p>
+
             </div>
 
-        </section>
+
+            <!-- TITLE -->
+
+            <div class="receipt-title">
+
+                <h2>
+                    PATIENT BILL / RECEIPT
+                </h2>
+
+            </div>
 
 
-        <!-- GENERATE BILL -->
+            <!-- BILL INFORMATION -->
 
-        <section class="card">
+            <div class="receipt-meta">
 
-            <h2>Generate Bill</h2>
+                <div>
+                    <strong>Bill Number:</strong>
+                    <%= searchedBill.getBillNumber() %>
+                </div>
 
-            <% if (treatment != null) { %>
+                <div>
+                    <strong>Bill Date:</strong>
+                    <%= searchedBill.getBillDate() %>
+                </div>
 
-                <table class="amount-table">
+            </div>
 
-                    <tr>
-                        <td>Consultation Fee</td>
-                        <td>
-                            Rs. <%= String.format(
-                                    "%.2f",
-                                    treatment.getConsultationFee()
-                            ) %>
-                        </td>
-                    </tr>
 
-                    <tr>
-                        <td>Treatment Cost</td>
-                        <td>
-                            Rs. <%= String.format(
-                                    "%.2f",
-                                    treatment.getTreatmentCost()
-                            ) %>
-                        </td>
-                    </tr>
+            <!-- PATIENT -->
 
-                    <tr class="total-row">
-                        <td>Total Amount</td>
-                        <td>
-                            Rs. <%= String.format(
-                                    "%.2f",
-                                    treatment.getConsultationFee()
-                                    + treatment.getTreatmentCost()
-                            ) %>
-                        </td>
-                    </tr>
+            <% if (patient != null) { %>
 
-                </table>
+                <div class="receipt-section">
 
-                <form
-                        class="bill-form"
-                        method="post"
-                        action="<%= request.getContextPath() %>/bills">
+                    <h3>
+                        Patient Information
+                    </h3>
 
-                    <input
-                            type="hidden"
-                            name="action"
-                            value="generate">
+                    <div class="receipt-details">
 
-                    <input
-                            type="hidden"
-                            name="appointmentId"
-                            value="<%= appointment.getId() %>">
+                        <div class="receipt-detail">
 
-                    <div class="form-group">
+                            <span>
+                                Patient Name
+                            </span>
 
-                        <label for="billNumber">
-                            Bill Number
-                        </label>
+                            <span>
+                                <%= patient.getFullName() %>
+                            </span>
 
-                        <input
-                                type="text"
-                                id="billNumber"
-                                name="billNumber"
-                                placeholder="e.g. BILL-001"
-                                maxlength="20"
-                                required>
+                        </div>
 
-                    </div>
 
-                    <div class="bill-actions">
+                        <div class="receipt-detail">
 
-                        <button
-                                type="submit"
-                                class="btn-primary">
-                            Generate Bill
-                        </button>
+                            <span>
+                                Patient Number
+                            </span>
+
+                            <span>
+                                <%= patient.getPatientNumber() %>
+                            </span>
+
+                        </div>
+
+
+                        <div class="receipt-detail">
+
+                            <span>
+                                Contact Number
+                            </span>
+
+                            <span>
+                                <%= patient.getContactNumber() %>
+                            </span>
+
+                        </div>
 
                     </div>
 
-                </form>
-
-            <% } else { %>
-
-                <div class="message error">
-                    Treatment information could not be loaded
-                    for this appointment.
                 </div>
 
             <% } %>
+
+
+            <!-- APPOINTMENT -->
+
+            <% if (appointment != null) { %>
+
+                <div class="receipt-section">
+
+                    <h3>
+                        Appointment Information
+                    </h3>
+
+                    <div class="receipt-details">
+
+                        <div class="receipt-detail">
+
+                            <span>
+                                Appointment ID
+                            </span>
+
+                            <span>
+                                <%= appointment.getId() %>
+                            </span>
+
+                        </div>
+
+
+                        <div class="receipt-detail">
+
+                            <span>
+                                Appointment Number
+                            </span>
+
+                            <span>
+                                <%= appointment.getAppointmentNumber() %>
+                            </span>
+
+                        </div>
+
+
+                        <div class="receipt-detail">
+
+                            <span>
+                                Date
+                            </span>
+
+                            <span>
+                                <%= appointment.getAppointmentDate() %>
+                            </span>
+
+                        </div>
+
+
+                        <div class="receipt-detail">
+
+                            <span>
+                                Time
+                            </span>
+
+                            <span>
+                                <%= appointment.getAppointmentTime() %>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            <% } %>
+
+
+            <!-- TREATMENT -->
+
+            <% if (treatment != null) { %>
+
+                <div class="receipt-section">
+
+                    <h3>
+                        Treatment Information
+                    </h3>
+
+                    <div class="receipt-details">
+
+                        <div class="receipt-detail">
+
+                            <span>
+                                Treatment
+                            </span>
+
+                            <span>
+                                <%= treatment.getTreatmentName() %>
+                            </span>
+
+                        </div>
+
+
+                        <div class="receipt-detail">
+
+                            <span>
+                                Treatment Code
+                            </span>
+
+                            <span>
+                                <%= treatment.getTreatmentCode() %>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            <% } %>
+
+
+            <!-- CHARGES -->
+
+            <div class="receipt-section">
+
+                <h3>
+                    Charges
+                </h3>
+
+                <table class="receipt-table">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>
+                            Description
+                        </th>
+
+                        <th>
+                            Amount
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    <tr>
+
+                        <td>
+                            Consultation Fee
+                        </td>
+
+                        <td>
+                            Rs.
+                            <%= String.format(
+                                    "%.2f",
+                                    searchedBill.getConsultationFee()
+                            ) %>
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Treatment Cost
+                        </td>
+
+                        <td>
+                            Rs.
+                            <%= String.format(
+                                    "%.2f",
+                                    searchedBill.getTreatmentCost()
+                            ) %>
+                        </td>
+
+                    </tr>
+
+
+                    <tr class="receipt-total">
+
+                        <td>
+                            TOTAL AMOUNT
+                        </td>
+
+                        <td>
+                            Rs.
+                            <%= String.format(
+                                    "%.2f",
+                                    searchedBill.getTotalAmount()
+                            ) %>
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="receipt-footer">
+
+                <div class="thank-you">
+                    Thank you for choosing Sunrise Dental.
+                </div>
+
+                <div>
+                    Please retain this receipt for your records.
+                </div>
+
+                <div>
+                    This is a computer-generated receipt.
+                </div>
+
+            </div>
 
         </section>
 
@@ -675,4 +1308,5 @@
 </main>
 
 </body>
+
 </html>

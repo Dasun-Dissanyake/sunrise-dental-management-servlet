@@ -1,3 +1,4 @@
+
 package com.sunrisedental.service;
 
 import com.sunrisedental.dao.PatientDAO;
@@ -35,6 +36,16 @@ public class PatientService {
         return patientDAO.findAll();
     }
 
+    public Patient getPatientById(Long id)
+            throws SQLException {
+
+        if (id == null || id <= 0) {
+            return null;
+        }
+
+        return patientDAO.findById(id);
+    }
+
     public Patient findPatient(String patientNumber)
             throws SQLException {
 
@@ -52,6 +63,12 @@ public class PatientService {
     }
 
     private void validatePatient(Patient patient) {
+
+        if (patient == null) {
+            throw new IllegalArgumentException(
+                    "Patient information is required."
+            );
+        }
 
         if (patient.getPatientNumber() == null ||
                 patient.getPatientNumber().isBlank()) {

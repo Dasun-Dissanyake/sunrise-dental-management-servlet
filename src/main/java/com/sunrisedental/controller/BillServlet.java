@@ -6,6 +6,8 @@ import com.sunrisedental.model.Treatment;
 import com.sunrisedental.service.AppointmentService;
 import com.sunrisedental.service.BillService;
 import com.sunrisedental.service.TreatmentService;
+import com.sunrisedental.model.Patient;
+import com.sunrisedental.service.PatientService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -22,12 +24,14 @@ public class BillServlet extends HttpServlet {
     private BillService billService;
     private AppointmentService appointmentService;
     private TreatmentService treatmentService;
+    private PatientService patientService;
 
     @Override
     public void init() {
         billService = new BillService();
         appointmentService = new AppointmentService();
         treatmentService = new TreatmentService();
+        patientService = new PatientService();
     }
 
     @Override
@@ -40,13 +44,65 @@ public class BillServlet extends HttpServlet {
             String billNumber = request.getParameter("billNumber");
             String appointmentIdParameter = request.getParameter("appointmentId");
 
-            if (billNumber != null && !billNumber.isBlank()) {
+if (billNumber != null && !billNumber.isBlank()) {
 
-                Bill bill = billService.getBillByNumber(
-                        billNumber.trim()
+    Bill bill = billService.getBillByNumber(
+            billNumber.trim()
+    );
+
+    request.setAttribute(
+            "searchedBill",
+            bill
+    );
+
+    /*
+     * Load appointment and patient information
+     * for the searched bill.
+     */
+    if (bill != null
+            && bill.getAppointmentId() != null) {
+
+        Appointment appointment =
+                appointmentService.getAppointmentById(
+                        bill.getAppointmentId()
                 );
 
-                request.setAttribute("searchedBill", bill);
+        request.setAttribute(
+                "appointment",
+                appointment
+        );
+
+        if (appointment != null
+                && appointment.getPatientId() != null) {
+
+            Patient patient =
+                    patientService.getPatientById(
+                            appointment.getPatientId()
+                    );
+
+            request.setAttribute(
+                    "patient",
+                    patient
+            );
+        }
+
+        /*
+         * Load treatment information.
+         */
+        if (appointment != null
+                && appointment.getTreatmentId() != null) {
+
+            Treatment treatment =
+                    treatmentService.getTreatmentById(
+                            appointment.getTreatmentId()
+                    );
+
+            request.setAttribute(
+                    "treatment",
+                    treatment
+            );
+        }
+    }
 
             } else if (appointmentIdParameter != null
                     && !appointmentIdParameter.isBlank()) {
@@ -78,15 +134,32 @@ public class BillServlet extends HttpServlet {
                         bill
                 );
 
-                Appointment appointment =
-                        appointmentService.getAppointmentById(
-                                appointmentId
-                        );
+Appointment appointment =
+        appointmentService.getAppointmentById(
+                appointmentId
+        );
 
-                request.setAttribute(
-                        "appointment",
-                        appointment
-                );
+request.setAttribute(
+        "appointment",
+        appointment
+);
+
+/*
+ * Retrieve the patient connected to this appointment.
+ */
+if (appointment != null
+        && appointment.getPatientId() != null) {
+
+    Patient patient =
+            patientService.getPatientById(
+                    appointment.getPatientId()
+            );
+
+    request.setAttribute(
+            "patient",
+            patient
+);
+}
 
                 /*
                  * Appointment stores only treatmentId.

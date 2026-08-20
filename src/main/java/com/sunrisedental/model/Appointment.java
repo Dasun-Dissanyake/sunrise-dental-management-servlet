@@ -17,6 +17,7 @@ public class Appointment {
     private Long dentistId;
     private Long patientId;
     private Long treatmentId;
+    private Treatment treatment;
 
     public Appointment() {
     }
@@ -125,4 +126,12 @@ public class Appointment {
     public void setTreatmentId(Long treatmentId) {
         this.treatmentId = treatmentId;
     }
+    public Treatment getTreatment() {
+    return treatment;
+}
+
+public void setTreatment(Treatment treatment) {
+    this.treatment = treatment;
+}
+
 }

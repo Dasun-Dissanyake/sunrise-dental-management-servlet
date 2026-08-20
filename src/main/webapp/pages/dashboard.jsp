@@ -202,9 +202,9 @@
                 Calculate and manage patient bills.
             </p>
 
-            <a href="#">
-                Manage Billing →
-            </a>
+<a href="<%= request.getContextPath() %>/bills">
+    Manage Billing →
+</a>
 
         </div>
 

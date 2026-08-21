@@ -1,214 +1,377 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-
 <%@ page import="com.sunrisedental.model.User" %>
 
 <%
-    User user = (User) request.getAttribute("user");
+User user = (User) request.getAttribute("user");
 %>
 
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Dashboard - Sunrise Dental</title>
 
-    <style>
+<title>Dashboard - Sunrise Dental</title>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<style>
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
-            color: #333;
-        }
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-        .header {
-            background: #ffffff;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-            border-bottom: 1px solid #ddd;
-        }
+    body {
+        font-family: Arial, sans-serif;
+        background: #f5f7fb;
+        color: #333;
+    }
 
-        .logo {
-            font-size: 22px;
-            font-weight: bold;
-        }
+    .header {
+        background: #ffffff;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+        border-bottom: 1px solid #ddd;
+    }
 
-        .user-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+    .logo {
+        font-size: 22px;
+        font-weight: bold;
+    }
 
-        .logout {
-            text-decoration: none;
-            padding: 8px 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            color: #333;
-        }
+    .user-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
 
-        .container {
-            padding: 30px;
-        }
+    .logout {
+        text-decoration: none;
+        padding: 8px 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        color: #333;
+        background: #fff;
+    }
 
-        .welcome {
-            margin-bottom: 30px;
-        }
+    .container {
+        padding: 30px;
+    }
 
-        .welcome h1 {
-            margin-bottom: 8px;
-        }
+    .welcome {
+        margin-bottom: 30px;
+    }
 
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-        }
+    .welcome h1 {
+        margin-bottom: 8px;
+    }
 
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            border: 1px solid #e5e5e5;
-        }
+    /* Dashboard Statistics */
 
-        .card h3 {
-            margin-bottom: 10px;
-        }
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(
+            auto-fit,
+            minmax(220px, 1fr)
+        );
+        gap: 20px;
+        margin-bottom: 30px;
+    }
 
-        .card a {
-            display: inline-block;
-            margin-top: 15px;
-            text-decoration: none;
-            color: #2563eb;
-        }
+    .stat-card {
+        background: white;
+        padding: 22px;
+        border-radius: 10px;
+        border: 1px solid #e5e5e5;
+    }
 
-    </style>
+    .stat-label {
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 10px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #111827;
+    }
+
+    .stat-revenue {
+        color: #166534;
+    }
+
+    /* Management Cards */
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(
+            auto-fit,
+            minmax(240px, 1fr)
+        );
+        gap: 20px;
+    }
+
+    .card {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        border: 1px solid #e5e5e5;
+    }
+
+    .card h3 {
+        margin-bottom: 10px;
+    }
+
+    .card a {
+        display: inline-block;
+        margin-top: 15px;
+        text-decoration: none;
+        color: #2563eb;
+    }
+
+</style>
+
+
 </head>
 
 <body>
 
 <header class="header">
 
-    <div class="logo">
-        Sunrise Dental
-    </div>
+<div class="logo">
+    Sunrise Dental
+</div>
 
-    <div class="user-section">
+<div class="user-section">
 
-        <span>
-            <%= user.getFullName() %>
-        </span>
+    <span>
+        <%= user.getFullName() %>
+    </span>
 
-        <a class="logout"
-           href="<%= request.getContextPath() %>/logout">
-            Logout
-        </a>
+    <a
+        class="logout"
+        href="<%= request.getContextPath() %>/logout">
+        Logout
+    </a>
 
-    </div>
+</div>
+
 
 </header>
 
 <main class="container">
 
-    <section class="welcome">
 
-        <h1>Welcome, <%= user.getFullName() %></h1>
+<!-- Welcome Section -->
 
-        <p>
-            Sunrise Dental Management System
-        </p>
+<section class="welcome">
 
-        <p>
-            Role: <strong><%= user.getRole() %></strong>
-        </p>
+    <h1>
+        Welcome, <%= user.getFullName() %>
+    </h1>
 
-    </section>
-
-
-    <section class="cards">
-
-        <div class="card">
-
-            <h3>Appointments</h3>
-
-            <p>
-                Register and manage patient appointments.
-            </p>
-
-            <a href="<%= request.getContextPath() %>/appointments">
-                Manage Appointments →
-            </a>
-
-        </div>
-
-
-        <div class="card">
-
-            <h3>Patients</h3>
-
-            <p>
-                View and manage patient information.
-            </p>
-
-            <a href="<%= request.getContextPath() %>/patients">
-                Manage Patients →
-            </a>
-
-        </div>
-
-
-        <div class="card">
-
-            <h3>Dentists</h3>
-
-            <p>
-                View and manage dentist information.
-            </p>
-
-            <a href="<%= request.getContextPath() %>/dentists">
-                Manage Dentists →
-            </a>
-
-        </div>
-
-        <div class="card">
-    <h3>Treatments</h3>
     <p>
-        View and manage available dental treatments.
+        Sunrise Dental Management System
     </p>
-    <a href="<%= request.getContextPath() %>/treatments">
-        Manage Treatments →
-    </a>
-</div>
+
+    <p>
+        Role:
+        <strong>
+            <%= user.getRole() %>
+        </strong>
+    </p>
+
+</section>
 
 
-        <div class="card">
+<!-- Dashboard Statistics -->
 
-            <h3>Billing</h3>
+<section class="stats">
 
-            <p>
-                Calculate and manage patient bills.
-            </p>
+    <div class="stat-card">
 
-<a href="<%= request.getContextPath() %>/bills">
-    Manage Billing →
-</a>
+        <div class="stat-label">
+            Total Patients
+        </div>
+
+        <div class="stat-value">
+            <%= request.getAttribute("totalPatients") %>
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-label">
+            Total Appointments
+        </div>
+
+        <div class="stat-value">
+            <%= request.getAttribute("totalAppointments") %>
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-label">
+            Today's Appointments
+        </div>
+
+        <div class="stat-value">
+            <%= request.getAttribute("todayAppointments") %>
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-label">
+            Total Revenue
+        </div>
+
+        <div class="stat-value stat-revenue">
+
+            Rs.
+            <%= String.format(
+                    "%.2f",
+                    request.getAttribute("totalRevenue")
+            ) %>
 
         </div>
 
-    </section>
+    </div>
+
+</section>
+
+
+<!-- Management Sections -->
+
+<section class="cards">
+
+
+    <!-- Appointments -->
+
+    <div class="card">
+
+        <h3>
+            Appointments
+        </h3>
+
+        <p>
+            Register and manage patient appointments.
+        </p>
+
+        <a
+            href="<%= request.getContextPath() %>/appointments">
+
+            Manage Appointments →
+
+        </a>
+
+    </div>
+
+
+    <!-- Patients -->
+
+    <div class="card">
+
+        <h3>
+            Patients
+        </h3>
+
+        <p>
+            View and manage patient information.
+        </p>
+
+        <a
+            href="<%= request.getContextPath() %>/patients">
+
+            Manage Patients →
+
+        </a>
+
+    </div>
+
+
+    <!-- Dentists -->
+
+    <div class="card">
+
+        <h3>
+            Dentists
+        </h3>
+
+        <p>
+            View and manage dentist information.
+        </p>
+
+        <a
+            href="<%= request.getContextPath() %>/dentists">
+
+            Manage Dentists →
+
+        </a>
+
+    </div>
+
+
+    <!-- Treatments -->
+
+    <div class="card">
+
+        <h3>
+            Treatments
+        </h3>
+
+        <p>
+            View and manage available dental treatments.
+        </p>
+
+        <a
+            href="<%= request.getContextPath() %>/treatments">
+
+            Manage Treatments →
+
+        </a>
+
+    </div>
+
+
+    <!-- Billing -->
+
+    <div class="card">
+
+        <h3>
+            Billing
+        </h3>
+
+        <p>
+            Calculate and manage patient bills.
+        </p>
+
+        <a
+            href="<%= request.getContextPath() %>/bills">
+
+            Manage Billing →
+
+        </a>
+
+    </div>
+
+
+</section>
+
 
 </main>
 

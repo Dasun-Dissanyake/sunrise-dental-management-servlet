@@ -9,9 +9,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
+import com.sunrisedental.model.DashboardAppointment;
+import java.util.List;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.sql.SQLException;
 
 @WebServlet("/dashboard")
@@ -43,31 +43,30 @@ public class DashboardServlet extends HttpServlet {
             return;
         }
 
+        User user =
+                (User) session.getAttribute("loggedInUser");
+
         try {
 
-            User user =
-                    (User) session.getAttribute("loggedInUser");
+            int totalPatients =
+                    dashboardService.getTotalPatients();
+
+            int totalAppointments =
+                    dashboardService.getTotalAppointments();
+
+            int todaysAppointments =
+                    dashboardService.getTodaysAppointments();
+
+            double totalRevenue =
+                    dashboardService.getTotalRevenue();
+
+                    List<DashboardAppointment> recentAppointments =
+        dashboardService.getRecentAppointments();
 
             request.setAttribute(
                     "user",
                     user
             );
-
-            // Load dashboard statistics
-
-            long totalPatients =
-                    dashboardService.getTotalPatients();
-
-            long totalAppointments =
-                    dashboardService.getTotalAppointments();
-
-            long todayAppointments =
-                    dashboardService.getTodayAppointments();
-
-            BigDecimal totalRevenue =
-                    dashboardService.getTotalRevenue();
-
-            // Send statistics to dashboard.jsp
 
             request.setAttribute(
                     "totalPatients",
@@ -80,8 +79,8 @@ public class DashboardServlet extends HttpServlet {
             );
 
             request.setAttribute(
-                    "todayAppointments",
-                    todayAppointments
+                    "todaysAppointments",
+                    todaysAppointments
             );
 
             request.setAttribute(
@@ -89,14 +88,14 @@ public class DashboardServlet extends HttpServlet {
                     totalRevenue
             );
 
-            // Open dashboard
+            request.setAttribute(
+        "recentAppointments",
+        recentAppointments
+);
 
             request.getRequestDispatcher(
                     "/pages/dashboard.jsp"
-            ).forward(
-                    request,
-                    response
-            );
+            ).forward(request, response);
 
         } catch (SQLException e) {
 

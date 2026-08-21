@@ -2,38 +2,37 @@ package com.sunrisedental.service;
 
 import com.sunrisedental.dao.DashboardDAO;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
+import com.sunrisedental.model.DashboardAppointment;
+import java.util.List;
 
 public class DashboardService {
 
     private final DashboardDAO dashboardDAO;
 
     public DashboardService() {
-        dashboardDAO = new DashboardDAO();
+        this.dashboardDAO = new DashboardDAO();
     }
 
-    public long getTotalPatients()
-            throws SQLException {
-
+    public int getTotalPatients() throws SQLException {
         return dashboardDAO.getTotalPatients();
     }
 
-    public long getTotalAppointments()
-            throws SQLException {
-
+    public int getTotalAppointments() throws SQLException {
         return dashboardDAO.getTotalAppointments();
     }
 
-    public long getTodayAppointments()
-            throws SQLException {
-
-        return dashboardDAO.getTodayAppointments();
+    public int getTodaysAppointments() throws SQLException {
+        return dashboardDAO.getTodaysAppointments();
     }
 
-    public BigDecimal getTotalRevenue()
-            throws SQLException {
-
+    public double getTotalRevenue() throws SQLException {
         return dashboardDAO.getTotalRevenue();
     }
+
+    public List<DashboardAppointment> getRecentAppointments()
+        throws SQLException {
+
+    return dashboardDAO.getRecentAppointments();
+}
 }

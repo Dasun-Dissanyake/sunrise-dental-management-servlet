@@ -503,9 +503,9 @@ if (recentAppointments == null) {
             View appointment, revenue and treatment reports.
         </p>
 
-        <a href="<%= request.getContextPath() %>/reports/appointments">
-            View Reports →
-        </a>
+        <a href="<%= request.getContextPath() %>/reports">
+    View Reports →
+</a>
 
     </div>
 

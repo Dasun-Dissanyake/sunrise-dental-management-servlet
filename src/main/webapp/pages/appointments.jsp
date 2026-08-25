@@ -6,8 +6,14 @@
 <%@ page import="com.sunrisedental.model.Patient" %>
 <%@ page import="com.sunrisedental.model.Dentist" %>
 <%@ page import="com.sunrisedental.model.Treatment" %>
+<%@ page import="com.sunrisedental.model.User" %>
 
 <%
+    User user = (User) session.getAttribute("loggedInUser");
+    if (user == null) {
+        user = (User) request.getAttribute("user");
+    }
+
     List<Appointment> appointments = (List<Appointment>) request.getAttribute("appointments");
     Appointment searchedAppointment = (Appointment) request.getAttribute("searchedAppointment");
     List<Patient> patients = (List<Patient>) request.getAttribute("patients");
@@ -44,220 +50,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Appointments - Sunrise Dental</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
-            color: #333;
-        }
-
-        .header {
-            background: #ffffff;
-            padding: 20px 30px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: 22px;
-        }
-
-        .back {
-            text-decoration: none;
-            color: #2563eb;
-        }
-
-        .container {
-            padding: 30px;
-            max-width: 1200px;
-            margin: auto;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            margin-bottom: 25px;
-            border-radius: 10px;
-            border: 1px solid #e5e5e5;
-        }
-
-        .card h2 {
-            margin-bottom: 20px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .form-group.full {
-            grid-column: span 2;
-        }
-
-        label {
-            font-weight: bold;
-        }
-
-        input,
-        select {
-            padding: 11px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        button, .btn {
-            margin-top: 20px;
-            padding: 11px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            background: #2563eb;
-            color: white;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-success {
-            background: #16a34a;
-        }
-        .btn-success:hover {
-            background: #15803d;
-        }
-
-        .btn-warning {
-            background: #ea580c;
-        }
-        .btn-warning:hover {
-            background: #c2410c;
-        }
-
-        .btn-danger {
-            background: #dc2626;
-        }
-        .btn-danger:hover {
-            background: #b91c1c;
-        }
-
-        .message {
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-        }
-
-        .error {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .search-form {
-            display: flex;
-            gap: 10px;
-        }
-
-        .search-form input {
-            flex: 1;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background: #f5f7fb;
-        }
-
-        .action-link {
-            color: #2563eb;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .action-link:hover {
-            text-decoration: underline;
-        }
-
-        .edit-section {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .status-SCHEDULED {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
-
-        .status-COMPLETED {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .status-CANCELLED {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .status-NO_SHOW {
-            background: #fef3c7;
-            color: #b45309;
-        }
-
-        .status-btn-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 15px;
-        }
-    </style>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/sunrise-theme.css">
 </head>
 <body>
 
 <header class="header">
-    <h1>Sunrise Dental - Appointments</h1>
-    <a class="back" href="<%= request.getContextPath() %>/dashboard">← Dashboard</a>
+    <div class="header-inner">
+        <a class="brand" href="<%= request.getContextPath() %>/dashboard">
+            <img
+                src="<%= request.getContextPath() %>/assets/images/sunrise-dental-logo.png"
+                alt="Sunrise Dental Logo"
+                class="brand-logo"
+            >
+            <div>
+                <div class="brand-name">Sunrise Dental</div>
+                <div class="brand-subtitle">Management System</div>
+            </div>
+        </a>
+
+        <div class="user-section">
+            <div class="user-info">
+                <div class="user-name"><%= user != null ? user.getFullName() : "User" %></div>
+                <div class="user-role"><%= user != null ? user.getRole() : "" %></div>
+            </div>
+            <a class="logout" href="<%= request.getContextPath() %>/logout">Logout</a>
+        </div>
+    </div>
 </header>
 
+<nav class="nav-bar">
+    <div class="nav-inner">
+        <a class="nav-link" href="<%= request.getContextPath() %>/dashboard">Dashboard</a>
+        <a class="nav-link active" href="<%= request.getContextPath() %>/appointments">Appointments</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/patients">Patients</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/dentists">Dentists</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/treatments">Treatments</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/bills">Billing</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/reports">Reports</a>
+    </div>
+</nav>
+
 <main class="container">
+
+    <div class="page-header">
+        <div class="page-header-text">
+            <h1>Appointments</h1>
+            <p>Schedule and manage patient appointments.</p>
+        </div>
+        <div class="page-header-actions">
+            <a class="back-link" href="<%= request.getContextPath() %>/dashboard">
+                &larr; Back to Dashboard
+            </a>
+        </div>
+    </div>
 
     <% if (error != null) { %>
         <div class="message error">
@@ -281,17 +126,30 @@
 
     <!-- REGISTER APPOINTMENT -->
     <div class="card">
-        <h2>Register New Appointment</h2>
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Schedule New Appointment</h2>
+                <p class="card-subtitle">Select patient, dentist, and treatment procedure to book a session.</p>
+            </div>
+        </div>
+
         <form method="post" action="<%= request.getContextPath() %>/appointments">
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Appointment Number</label>
-                    <input type="text" name="appointmentNumber" required maxlength="20" placeholder="e.g. APP-001">
+                    <label for="appointmentNumber">Appointment Number <span class="required-indicator">*</span></label>
+                    <input
+                        type="text"
+                        id="appointmentNumber"
+                        name="appointmentNumber"
+                        required
+                        maxlength="20"
+                        placeholder="e.g. APP-001"
+                    >
                 </div>
 
                 <div class="form-group">
-                    <label>Patient</label>
-                    <select name="patientId" required>
+                    <label for="patientId">Patient <span class="required-indicator">*</span></label>
+                    <select id="patientId" name="patientId" required>
                         <option value="">-- Select Patient --</option>
                         <% if (patients != null) { %>
                             <% for (Patient p : patients) { %>
@@ -302,8 +160,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Dentist</label>
-                    <select name="dentistId" required>
+                    <label for="dentistId">Dentist <span class="required-indicator">*</span></label>
+                    <select id="dentistId" name="dentistId" required>
                         <option value="">-- Select Dentist --</option>
                         <% if (dentists != null) { %>
                             <% for (Dentist d : dentists) { %>
@@ -314,8 +172,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Treatment</label>
-                    <select name="treatmentId" required>
+                    <label for="treatmentId">Treatment <span class="required-indicator">*</span></label>
+                    <select id="treatmentId" name="treatmentId" required>
                         <option value="">-- Select Treatment --</option>
                         <% if (treatments != null) { %>
                             <% for (Treatment t : treatments) { %>
@@ -326,187 +184,226 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Appointment Date</label>
-                    <input type="date" name="appointmentDate" required>
+                    <label for="appointmentDate">Appointment Date <span class="required-indicator">*</span></label>
+                    <input type="date" id="appointmentDate" name="appointmentDate" required>
                 </div>
 
                 <div class="form-group">
-                    <label>Appointment Time</label>
-                    <input type="time" name="appointmentTime" required>
+                    <label for="appointmentTime">Appointment Time <span class="required-indicator">*</span></label>
+                    <input type="time" id="appointmentTime" name="appointmentTime" required>
                 </div>
 
                 <div class="form-group full">
-                    <label>Notes</label>
-                    <input type="text" name="notes" maxlength="500" placeholder="Optional notes">
+                    <label for="notes">Clinical Notes</label>
+                    <input
+                        type="text"
+                        id="notes"
+                        name="notes"
+                        maxlength="500"
+                        placeholder="Optional clinical or consultation notes"
+                    >
                 </div>
             </div>
 
-            <button type="submit">Register Appointment</button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Schedule Appointment</button>
+            </div>
         </form>
     </div>
 
     <!-- SEARCH APPOINTMENT -->
     <div class="card">
-        <h2>Search Appointment</h2>
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Search Appointment</h2>
+                <p class="card-subtitle">Lookup appointment by unique code to manage or change status.</p>
+            </div>
+        </div>
+
         <form class="search-form" method="get" action="<%= request.getContextPath() %>/appointments">
-            <input type="text" name="appointmentNumber" placeholder="Enter appointment number" required>
-            <button type="submit">Search</button>
+            <input
+                type="text"
+                name="appointmentNumber"
+                placeholder="Enter appointment number (e.g. APP-001)"
+                required
+            >
+            <button type="submit" class="btn btn-dark">Search Appointment</button>
         </form>
 
         <% if (searchedAppointment != null) { %>
-            <table>
-                <tr>
-                    <th>Appointment Number</th>
-                    <td><%= searchedAppointment.getAppointmentNumber() %></td>
-                </tr>
-                <tr>
-                    <th>Patient</th>
-                    <td><%= patientMap.getOrDefault(searchedAppointment.getPatientId(), "Patient ID: " + searchedAppointment.getPatientId()) %></td>
-                </tr>
-                <tr>
-                    <th>Dentist</th>
-                    <td><%= dentistMap.getOrDefault(searchedAppointment.getDentistId(), "Dentist ID: " + searchedAppointment.getDentistId()) %></td>
-                </tr>
-                <tr>
-                    <th>Treatment</th>
-                    <td><%= treatmentMap.getOrDefault(searchedAppointment.getTreatmentId(), "Treatment ID: " + searchedAppointment.getTreatmentId()) %></td>
-                </tr>
-                <tr>
-                    <th>Date</th>
-                    <td><%= searchedAppointment.getAppointmentDate() %></td>
-                </tr>
-                <tr>
-                    <th>Time</th>
-                    <td><%= searchedAppointment.getAppointmentTime() %></td>
-                </tr>
-                <tr>
-                    <th>Status</th>
-                    <td>
-                        <span class="status-badge status-<%= searchedAppointment.getStatus() %>">
-                            <%= searchedAppointment.getStatus() %>
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Notes</th>
-                    <td><%= searchedAppointment.getNotes() != null ? searchedAppointment.getNotes() : "-" %></td>
-                </tr>
-            </table>
+            <div style="margin-top: 24px;">
+                <div class="details-grid">
+                    <div class="detail-box">
+                        <div class="detail-label">Appointment Number</div>
+                        <div class="detail-value"><%= searchedAppointment.getAppointmentNumber() %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Patient</div>
+                        <div class="detail-value"><%= patientMap.getOrDefault(searchedAppointment.getPatientId(), "Patient ID: " + searchedAppointment.getPatientId()) %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Dentist</div>
+                        <div class="detail-value"><%= dentistMap.getOrDefault(searchedAppointment.getDentistId(), "Dentist ID: " + searchedAppointment.getDentistId()) %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Treatment</div>
+                        <div class="detail-value"><%= treatmentMap.getOrDefault(searchedAppointment.getTreatmentId(), "Treatment ID: " + searchedAppointment.getTreatmentId()) %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Date &amp; Time</div>
+                        <div class="detail-value"><%= searchedAppointment.getAppointmentDate() %> at <%= searchedAppointment.getAppointmentTime() %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Current Status</div>
+                        <div class="detail-value">
+                            <span class="status status-<%= searchedAppointment.getStatus() %>">
+                                <%= searchedAppointment.getStatus() %>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="detail-box full" style="grid-column: 1 / -1;">
+                        <div class="detail-label">Notes</div>
+                        <div class="detail-value" style="font-weight: 500; font-size: 13px;">
+                            <%= searchedAppointment.getNotes() != null && !searchedAppointment.getNotes().isEmpty() ? searchedAppointment.getNotes() : "No notes recorded" %>
+                        </div>
+                    </div>
+                </div>
 
-            <!-- QUICK STATUS UPDATE -->
-            <div class="edit-section">
-                <h3>Update Status</h3>
-                <div class="status-btn-group">
-                    <form method="post" action="<%= request.getContextPath() %>/appointments" style="display:inline;">
-                        <input type="hidden" name="action" value="status">
-                        <input type="hidden" name="id" value="<%= searchedAppointment.getId() %>">
-                        <input type="hidden" name="status" value="SCHEDULED">
-                        <button type="submit" class="btn" style="margin-top:0;">Set SCHEDULED</button>
-                    </form>
+                <!-- QUICK STATUS UPDATE -->
+                <div class="edit-section">
+                    <h3>Quick Status Update</h3>
+                    <div class="status-btn-group">
+                        <form method="post" action="<%= request.getContextPath() %>/appointments">
+                            <input type="hidden" name="action" value="status">
+                            <input type="hidden" name="id" value="<%= searchedAppointment.getId() %>">
+                            <input type="hidden" name="status" value="SCHEDULED">
+                            <button type="submit" class="btn btn-secondary btn-sm">Set SCHEDULED</button>
+                        </form>
 
-                    <form method="post" action="<%= request.getContextPath() %>/appointments" style="display:inline;">
-                        <input type="hidden" name="action" value="status">
-                        <input type="hidden" name="id" value="<%= searchedAppointment.getId() %>">
-                        <input type="hidden" name="status" value="COMPLETED">
-                        <button type="submit" class="btn btn-success" style="margin-top:0;">Set COMPLETED</button>
-                    </form>
+                        <form method="post" action="<%= request.getContextPath() %>/appointments">
+                            <input type="hidden" name="action" value="status">
+                            <input type="hidden" name="id" value="<%= searchedAppointment.getId() %>">
+                            <input type="hidden" name="status" value="COMPLETED">
+                            <button type="submit" class="btn btn-success btn-sm">Set COMPLETED</button>
+                        </form>
 
-                    <form method="post" action="<%= request.getContextPath() %>/appointments" style="display:inline;">
-                        <input type="hidden" name="action" value="status">
-                        <input type="hidden" name="id" value="<%= searchedAppointment.getId() %>">
-                        <input type="hidden" name="status" value="CANCELLED">
-                        <button type="submit" class="btn btn-danger" style="margin-top:0;">Set CANCELLED</button>
-                    </form>
+                        <form method="post" action="<%= request.getContextPath() %>/appointments">
+                            <input type="hidden" name="action" value="status">
+                            <input type="hidden" name="id" value="<%= searchedAppointment.getId() %>">
+                            <input type="hidden" name="status" value="CANCELLED">
+                            <button type="submit" class="btn btn-danger btn-sm">Set CANCELLED</button>
+                        </form>
 
-                    <form method="post" action="<%= request.getContextPath() %>/appointments" style="display:inline;">
-                        <input type="hidden" name="action" value="status">
+                        <form method="post" action="<%= request.getContextPath() %>/appointments">
+                            <input type="hidden" name="action" value="status">
+                            <input type="hidden" name="id" value="<%= searchedAppointment.getId() %>">
+                            <input type="hidden" name="status" value="NO_SHOW">
+                            <button type="submit" class="btn btn-warning btn-sm">Set NO SHOW</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- EDIT DETAILS FORM -->
+                <div class="edit-section">
+                    <h3>Edit Appointment Details</h3>
+                    <form method="post" action="<%= request.getContextPath() %>/appointments">
+                        <input type="hidden" name="action" value="update">
                         <input type="hidden" name="id" value="<%= searchedAppointment.getId() %>">
-                        <input type="hidden" name="status" value="NO_SHOW">
-                        <button type="submit" class="btn btn-warning" style="margin-top:0;">Set NO SHOW</button>
+                        <input type="hidden" name="appointmentNumber" value="<%= searchedAppointment.getAppointmentNumber() %>">
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="editPatientId">Patient <span class="required-indicator">*</span></label>
+                                <select id="editPatientId" name="patientId" required>
+                                    <% if (patients != null) { %>
+                                        <% for (Patient p : patients) { %>
+                                            <option value="<%= p.getId() %>" <%= p.getId().equals(searchedAppointment.getPatientId()) ? "selected" : "" %>>
+                                                <%= p.getFullName() %> (<%= p.getPatientNumber() %>)
+                                            </option>
+                                        <% } %>
+                                    <% } %>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editDentistId">Dentist <span class="required-indicator">*</span></label>
+                                <select id="editDentistId" name="dentistId" required>
+                                    <% if (dentists != null) { %>
+                                        <% for (Dentist d : dentists) { %>
+                                            <option value="<%= d.getId() %>" <%= d.getId().equals(searchedAppointment.getDentistId()) ? "selected" : "" %>>
+                                                <%= d.getFullName() %> (<%= d.getSpecialization() %>)
+                                            </option>
+                                        <% } %>
+                                    <% } %>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editTreatmentId">Treatment <span class="required-indicator">*</span></label>
+                                <select id="editTreatmentId" name="treatmentId" required>
+                                    <% if (treatments != null) { %>
+                                        <% for (Treatment t : treatments) { %>
+                                            <option value="<%= t.getId() %>" <%= t.getId().equals(searchedAppointment.getTreatmentId()) ? "selected" : "" %>>
+                                                <%= t.getTreatmentName() %> (<%= t.getTreatmentCode() %>)
+                                            </option>
+                                        <% } %>
+                                    <% } %>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editStatus">Status <span class="required-indicator">*</span></label>
+                                <select id="editStatus" name="status" required>
+                                    <option value="SCHEDULED" <%= "SCHEDULED".equals(searchedAppointment.getStatus()) ? "selected" : "" %>>SCHEDULED</option>
+                                    <option value="COMPLETED" <%= "COMPLETED".equals(searchedAppointment.getStatus()) ? "selected" : "" %>>COMPLETED</option>
+                                    <option value="CANCELLED" <%= "CANCELLED".equals(searchedAppointment.getStatus()) ? "selected" : "" %>>CANCELLED</option>
+                                    <option value="NO_SHOW" <%= "NO_SHOW".equals(searchedAppointment.getStatus()) ? "selected" : "" %>>NO SHOW</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editAppointmentDate">Appointment Date <span class="required-indicator">*</span></label>
+                                <input
+                                    type="date"
+                                    id="editAppointmentDate"
+                                    name="appointmentDate"
+                                    value="<%= searchedAppointment.getAppointmentDate() %>"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editAppointmentTime">Appointment Time <span class="required-indicator">*</span></label>
+                                <input
+                                    type="time"
+                                    id="editAppointmentTime"
+                                    name="appointmentTime"
+                                    value="<%= searchedAppointment.getAppointmentTime() %>"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group full">
+                                <label for="editNotes">Clinical Notes</label>
+                                <input
+                                    type="text"
+                                    id="editNotes"
+                                    name="notes"
+                                    value="<%= searchedAppointment.getNotes() != null ? searchedAppointment.getNotes() : "" %>"
+                                    maxlength="500"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Update Appointment</button>
+                        </div>
                     </form>
                 </div>
             </div>
 
-            <!-- EDIT DETAILS FORM -->
-            <div class="edit-section">
-                <h3>Edit Appointment Details</h3>
-                <form method="post" action="<%= request.getContextPath() %>/appointments">
-                    <input type="hidden" name="action" value="update">
-                    <input type="hidden" name="id" value="<%= searchedAppointment.getId() %>">
-                    <input type="hidden" name="appointmentNumber" value="<%= searchedAppointment.getAppointmentNumber() %>">
-
-                    <div class="form-grid" style="margin-top: 15px;">
-                        <div class="form-group">
-                            <label>Patient</label>
-                            <select name="patientId" required>
-                                <% if (patients != null) { %>
-                                    <% for (Patient p : patients) { %>
-                                        <option value="<%= p.getId() %>" <%= p.getId().equals(searchedAppointment.getPatientId()) ? "selected" : "" %>>
-                                            <%= p.getFullName() %> (<%= p.getPatientNumber() %>)
-                                        </option>
-                                    <% } %>
-                                <% } %>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Dentist</label>
-                            <select name="dentistId" required>
-                                <% if (dentists != null) { %>
-                                    <% for (Dentist d : dentists) { %>
-                                        <option value="<%= d.getId() %>" <%= d.getId().equals(searchedAppointment.getDentistId()) ? "selected" : "" %>>
-                                            <%= d.getFullName() %> (<%= d.getSpecialization() %>)
-                                        </option>
-                                    <% } %>
-                                <% } %>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Treatment</label>
-                            <select name="treatmentId" required>
-                                <% if (treatments != null) { %>
-                                    <% for (Treatment t : treatments) { %>
-                                        <option value="<%= t.getId() %>" <%= t.getId().equals(searchedAppointment.getTreatmentId()) ? "selected" : "" %>>
-                                            <%= t.getTreatmentName() %> (<%= t.getTreatmentCode() %>)
-                                        </option>
-                                    <% } %>
-                                <% } %>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Status</label>
-                            <select name="status" required>
-                                <option value="SCHEDULED" <%= "SCHEDULED".equals(searchedAppointment.getStatus()) ? "selected" : "" %>>SCHEDULED</option>
-                                <option value="COMPLETED" <%= "COMPLETED".equals(searchedAppointment.getStatus()) ? "selected" : "" %>>COMPLETED</option>
-                                <option value="CANCELLED" <%= "CANCELLED".equals(searchedAppointment.getStatus()) ? "selected" : "" %>>CANCELLED</option>
-                                <option value="NO_SHOW" <%= "NO_SHOW".equals(searchedAppointment.getStatus()) ? "selected" : "" %>>NO SHOW</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Appointment Date</label>
-                            <input type="date" name="appointmentDate" value="<%= searchedAppointment.getAppointmentDate() %>" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Appointment Time</label>
-                            <input type="time" name="appointmentTime" value="<%= searchedAppointment.getAppointmentTime() %>" required>
-                        </div>
-
-                        <div class="form-group full">
-                            <label>Notes</label>
-                            <input type="text" name="notes" value="<%= searchedAppointment.getNotes() != null ? searchedAppointment.getNotes() : "" %>" maxlength="500">
-                        </div>
-                    </div>
-
-                    <button type="submit">Update Appointment</button>
-                </form>
-            </div>
-
         <% } else if (request.getParameter("appointmentNumber") != null) { %>
-            <div class="message error" style="margin-top: 20px;">
+            <div class="message error" style="margin-top: 20px; margin-bottom: 0;">
                 No appointment found with that appointment number.
             </div>
         <% } %>
@@ -515,47 +412,65 @@
     <!-- APPOINTMENTS LIST -->
     <% if (appointments != null) { %>
         <div class="card">
-            <h2>All Appointments</h2>
-            <table>
-                <thead>
-                <tr>
-                    <th>Appointment #</th>
-                    <th>Patient</th>
-                    <th>Dentist</th>
-                    <th>Treatment</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <% for (Appointment a : appointments) { %>
-                    <tr>
-                        <td><%= a.getAppointmentNumber() %></td>
-                        <td><%= patientMap.getOrDefault(a.getPatientId(), "ID: " + a.getPatientId()) %></td>
-                        <td><%= dentistMap.getOrDefault(a.getDentistId(), "ID: " + a.getDentistId()) %></td>
-                        <td><%= treatmentMap.getOrDefault(a.getTreatmentId(), "ID: " + a.getTreatmentId()) %></td>
-                        <td><%= a.getAppointmentDate() %></td>
-                        <td><%= a.getAppointmentTime() %></td>
-                        <td>
-                            <span class="status-badge status-<%= a.getStatus() %>">
-                                <%= a.getStatus() %>
-                            </span>
-                        </td>
-                        <td>
-                            <a class="action-link" href="<%= request.getContextPath() %>/appointments?appointmentNumber=<%= a.getAppointmentNumber() %>">
-                                View / Edit
-                            </a>
-                        </td>
-                    </tr>
-                <% } %>
-                </tbody>
-            </table>
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">All Clinic Appointments</h2>
+                    <p class="card-subtitle">Complete schedule of scheduled and completed dental appointments.</p>
+                </div>
+            </div>
+
+            <% if (appointments.isEmpty()) { %>
+                <div class="empty-state">
+                    No appointments found in the system.
+                </div>
+            <% } else { %>
+                <div class="table-container">
+                    <table class="app-table">
+                        <thead>
+                        <tr>
+                            <th>Appointment #</th>
+                            <th>Patient</th>
+                            <th>Dentist</th>
+                            <th>Treatment</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <% for (Appointment a : appointments) { %>
+                            <tr>
+                                <td class="code-highlight"><%= a.getAppointmentNumber() %></td>
+                                <td><%= patientMap.getOrDefault(a.getPatientId(), "ID: " + a.getPatientId()) %></td>
+                                <td><%= dentistMap.getOrDefault(a.getDentistId(), "ID: " + a.getDentistId()) %></td>
+                                <td><%= treatmentMap.getOrDefault(a.getTreatmentId(), "ID: " + a.getTreatmentId()) %></td>
+                                <td><%= a.getAppointmentDate() %></td>
+                                <td><%= a.getAppointmentTime() %></td>
+                                <td>
+                                    <span class="status status-<%= a.getStatus() %>">
+                                        <%= a.getStatus() %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <a class="action-link" href="<%= request.getContextPath() %>/appointments?appointmentNumber=<%= a.getAppointmentNumber() %>">
+                                        View / Edit
+                                    </a>
+                                </td>
+                            </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
         </div>
     <% } %>
 
 </main>
+
+<footer class="footer">
+    Sunrise Dental Management System &bull; Professional Dental Care &amp; Clinical Operations
+</footer>
 
 </body>
 </html>

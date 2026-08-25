@@ -1,206 +1,85 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="java.util.List" %>
 <%@ page import="com.sunrisedental.model.Dentist" %>
+<%@ page import="com.sunrisedental.model.User" %>
 
 <%
+    User user = (User) session.getAttribute("loggedInUser");
+    if (user == null) {
+        user = (User) request.getAttribute("user");
+    }
+
     List<Dentist> dentists = (List<Dentist>) request.getAttribute("dentists");
     Dentist searchedDentist = (Dentist) request.getAttribute("searchedDentist");
     String error = (String) request.getAttribute("error");
     String success = request.getParameter("success");
-    String errorParam = request.getParameter("error");
 %>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dentists - Sunrise Dental</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
-            color: #333;
-        }
-
-        .header {
-            background: #ffffff;
-            padding: 20px 30px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: 22px;
-        }
-
-        .back {
-            text-decoration: none;
-            color: #2563eb;
-        }
-
-        .container {
-            padding: 30px;
-            max-width: 1200px;
-            margin: auto;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            margin-bottom: 25px;
-            border-radius: 10px;
-            border: 1px solid #e5e5e5;
-        }
-
-        .card h2 {
-            margin-bottom: 20px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .form-group.full {
-            grid-column: span 2;
-        }
-
-        label {
-            font-weight: bold;
-        }
-
-        input,
-        select {
-            padding: 11px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        button, .btn {
-            margin-top: 20px;
-            padding: 11px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            background: #2563eb;
-            color: white;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-danger {
-            background: #dc2626;
-        }
-
-        .btn-danger:hover {
-            background: #b91c1c;
-        }
-
-        .message {
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-        }
-
-        .error {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .search-form {
-            display: flex;
-            gap: 10px;
-        }
-
-        .search-form input {
-            flex: 1;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background: #f5f7fb;
-        }
-
-        .action-link {
-            color: #2563eb;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .action-link:hover {
-            text-decoration: underline;
-        }
-
-        .edit-section {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-
-        .actions-row {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-    </style>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/sunrise-theme.css">
 </head>
+
 <body>
 
 <header class="header">
-    <h1>Sunrise Dental - Dentists</h1>
-    <a class="back" href="<%= request.getContextPath() %>/dashboard">← Dashboard</a>
+    <div class="header-inner">
+        <a class="brand" href="<%= request.getContextPath() %>/dashboard">
+            <img
+                src="<%= request.getContextPath() %>/assets/images/sunrise-dental-logo.png"
+                alt="Sunrise Dental Logo"
+                class="brand-logo"
+            >
+            <div>
+                <div class="brand-name">Sunrise Dental</div>
+                <div class="brand-subtitle">Management System</div>
+            </div>
+        </a>
+
+        <div class="user-section">
+            <div class="user-info">
+                <div class="user-name"><%= user != null ? user.getFullName() : "User" %></div>
+                <div class="user-role"><%= user != null ? user.getRole() : "" %></div>
+            </div>
+            <a class="logout" href="<%= request.getContextPath() %>/logout">Logout</a>
+        </div>
+    </div>
 </header>
 
+<nav class="nav-bar">
+    <div class="nav-inner">
+        <a class="nav-link" href="<%= request.getContextPath() %>/dashboard">Dashboard</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/appointments">Appointments</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/patients">Patients</a>
+        <a class="nav-link active" href="<%= request.getContextPath() %>/dentists">Dentists</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/treatments">Treatments</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/bills">Billing</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/reports">Reports</a>
+    </div>
+</nav>
+
 <main class="container">
+
+    <div class="page-header">
+        <div class="page-header-text">
+            <h1>Dentists</h1>
+            <p>Manage dentist profiles and availability.</p>
+        </div>
+        <div class="page-header-actions">
+            <a class="back-link" href="<%= request.getContextPath() %>/dashboard">
+                &larr; Back to Dashboard
+            </a>
+        </div>
+    </div>
 
     <% if (error != null) { %>
         <div class="message error">
             <%= error %>
-        </div>
-    <% } %>
-
-    <% if ("invalid".equals(errorParam)) { %>
-        <div class="message error">
-            Invalid dentist information provided.
-        </div>
-    <% } else if ("notfound".equals(errorParam)) { %>
-        <div class="message error">
-            Dentist record not found.
         </div>
     <% } %>
 
@@ -220,142 +99,249 @@
 
     <!-- REGISTER DENTIST -->
     <div class="card">
-        <h2>Register New Dentist</h2>
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Register New Dentist</h2>
+                <p class="card-subtitle">Add a licensed practitioner to the clinic schedule and practitioner roster.</p>
+            </div>
+        </div>
+
         <form method="post" action="<%= request.getContextPath() %>/dentists">
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Dentist Number</label>
-                    <input type="text" name="dentistNumber" required maxlength="20" placeholder="e.g. D001">
+                    <label for="dentistNumber">Dentist Number <span class="required-indicator">*</span></label>
+                    <input
+                        type="text"
+                        id="dentistNumber"
+                        name="dentistNumber"
+                        required
+                        maxlength="20"
+                        placeholder="e.g. DEN-001"
+                    >
                 </div>
 
                 <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" name="fullName" required maxlength="100" placeholder="e.g. Dr. John Silva">
+                    <label for="fullName">Full Name <span class="required-indicator">*</span></label>
+                    <input
+                        type="text"
+                        id="fullName"
+                        name="fullName"
+                        required
+                        maxlength="100"
+                        placeholder="e.g. Dr. Jane Smith"
+                    >
                 </div>
 
                 <div class="form-group">
-                    <label>Specialization</label>
-                    <input type="text" name="specialization" required maxlength="100" placeholder="e.g. General Dentistry">
+                    <label for="specialization">Specialization <span class="required-indicator">*</span></label>
+                    <input
+                        type="text"
+                        id="specialization"
+                        name="specialization"
+                        required
+                        maxlength="100"
+                        placeholder="e.g. Orthodontics, Periodontics"
+                    >
                 </div>
 
                 <div class="form-group">
-                    <label>Contact Number</label>
-                    <input type="tel" name="contactNumber" required maxlength="20" placeholder="e.g. 0771234567">
+                    <label for="contactNumber">Contact Number <span class="required-indicator">*</span></label>
+                    <input
+                        type="tel"
+                        id="contactNumber"
+                        name="contactNumber"
+                        required
+                        maxlength="20"
+                        placeholder="e.g. 0771234567"
+                    >
                 </div>
             </div>
 
-            <button type="submit">Register Dentist</button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Register Dentist</button>
+            </div>
         </form>
     </div>
 
     <!-- SEARCH DENTIST -->
     <div class="card">
-        <h2>Search Dentist</h2>
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Search Dentist</h2>
+                <p class="card-subtitle">Search registered dentists by dentist number to view credentials or update profile.</p>
+            </div>
+        </div>
+
         <form class="search-form" method="get" action="<%= request.getContextPath() %>/dentists">
-            <input type="text" name="dentistNumber" placeholder="Enter dentist number" required>
-            <button type="submit">Search</button>
+            <input
+                type="text"
+                name="dentistNumber"
+                placeholder="Enter dentist number (e.g. DEN-001)"
+                required
+            >
+            <button type="submit" class="btn btn-dark">Search Dentist</button>
         </form>
 
         <% if (searchedDentist != null) { %>
-            <table>
-                <tr>
-                    <th>Dentist Number</th>
-                    <td><%= searchedDentist.getDentistNumber() %></td>
-                </tr>
-                <tr>
-                    <th>Full Name</th>
-                    <td><%= searchedDentist.getFullName() %></td>
-                </tr>
-                <tr>
-                    <th>Specialization</th>
-                    <td><%= searchedDentist.getSpecialization() %></td>
-                </tr>
-                <tr>
-                    <th>Contact Number</th>
-                    <td><%= searchedDentist.getContactNumber() %></td>
-                </tr>
-                <tr>
-                    <th>Status</th>
-                    <td><%= searchedDentist.isActive() ? "Active" : "Inactive" %></td>
-                </tr>
-            </table>
-
-            <div class="edit-section">
-                <h3>Update Dentist Details</h3>
-                <form method="post" action="<%= request.getContextPath() %>/dentists">
-                    <input type="hidden" name="action" value="update">
-                    <input type="hidden" name="id" value="<%= searchedDentist.getId() %>">
-
-                    <div class="form-grid" style="margin-top: 15px;">
-                        <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" name="fullName" value="<%= searchedDentist.getFullName() %>" required maxlength="100">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Specialization</label>
-                            <input type="text" name="specialization" value="<%= searchedDentist.getSpecialization() %>" required maxlength="100">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Contact Number</label>
-                            <input type="tel" name="contactNumber" value="<%= searchedDentist.getContactNumber() %>" required maxlength="20">
+            <div style="margin-top: 24px;">
+                <div class="details-grid">
+                    <div class="detail-box">
+                        <div class="detail-label">Dentist Number</div>
+                        <div class="detail-value"><%= searchedDentist.getDentistNumber() %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Doctor Name</div>
+                        <div class="detail-value"><%= searchedDentist.getFullName() %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Specialization</div>
+                        <div class="detail-value"><%= searchedDentist.getSpecialization() %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Contact Number</div>
+                        <div class="detail-value"><%= searchedDentist.getContactNumber() %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value">
+                            <span class="status <%= searchedDentist.isActive() ? "status-ACTIVE" : "status-INACTIVE" %>">
+                                <%= searchedDentist.isActive() ? "Active" : "Inactive" %>
+                            </span>
                         </div>
                     </div>
+                </div>
 
-                    <div class="actions-row">
-                        <button type="submit">Update Dentist</button>
+                <!-- UPDATE DENTIST FORM -->
+                <div class="edit-section">
+                    <h3>Update Dentist Profile</h3>
+                    <form method="post" action="<%= request.getContextPath() %>/dentists">
+                        <input type="hidden" name="action" value="update">
+                        <input type="hidden" name="id" value="<%= searchedDentist.getId() %>">
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="editFullName">Full Name <span class="required-indicator">*</span></label>
+                                <input
+                                    type="text"
+                                    id="editFullName"
+                                    name="fullName"
+                                    value="<%= searchedDentist.getFullName() %>"
+                                    required
+                                    maxlength="100"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editSpecialization">Specialization <span class="required-indicator">*</span></label>
+                                <input
+                                    type="text"
+                                    id="editSpecialization"
+                                    name="specialization"
+                                    value="<%= searchedDentist.getSpecialization() %>"
+                                    required
+                                    maxlength="100"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editContactNumber">Contact Number <span class="required-indicator">*</span></label>
+                                <input
+                                    type="tel"
+                                    id="editContactNumber"
+                                    name="contactNumber"
+                                    value="<%= searchedDentist.getContactNumber() %>"
+                                    required
+                                    maxlength="20"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Update Dentist</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- DEACTIVATE DENTIST -->
+                <% if (searchedDentist.isActive()) { %>
+                    <div class="edit-section">
+                        <h3>Deactivate Dentist</h3>
+                        <p style="color: var(--muted); font-size: 13px; margin-bottom: 14px;">
+                            Deactivating will mark the practitioner as inactive in the system.
+                        </p>
+                        <form method="post" action="<%= request.getContextPath() %>/dentists">
+                            <input type="hidden" name="action" value="deactivate">
+                            <input type="hidden" name="id" value="<%= searchedDentist.getId() %>">
+                            <button type="submit" class="btn btn-danger">Deactivate Dentist</button>
+                        </form>
                     </div>
-                </form>
-
-                <form method="post" action="<%= request.getContextPath() %>/dentists" style="margin-top: 10px;" onsubmit="return confirm('Are you sure you want to deactivate this dentist?');">
-                    <input type="hidden" name="action" value="deactivate">
-                    <input type="hidden" name="id" value="<%= searchedDentist.getId() %>">
-                    <button type="submit" class="btn btn-danger">Deactivate Dentist</button>
-                </form>
+                <% } %>
             </div>
-
         <% } else if (request.getParameter("dentistNumber") != null) { %>
-            <div class="message error" style="margin-top: 20px;">
+            <div class="message error" style="margin-top: 20px; margin-bottom: 0;">
                 No dentist found with that dentist number.
             </div>
         <% } %>
     </div>
 
-    <!-- ACTIVE DENTISTS LIST -->
+    <!-- ACTIVE DENTISTS TABLE -->
     <% if (dentists != null) { %>
         <div class="card">
-            <h2>Active Dentists</h2>
-            <table>
-                <thead>
-                <tr>
-                    <th>Dentist Number</th>
-                    <th>Full Name</th>
-                    <th>Specialization</th>
-                    <th>Contact Number</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <% for (Dentist dentist : dentists) { %>
-                    <tr>
-                        <td><%= dentist.getDentistNumber() %></td>
-                        <td><%= dentist.getFullName() %></td>
-                        <td><%= dentist.getSpecialization() %></td>
-                        <td><%= dentist.getContactNumber() %></td>
-                        <td>
-                            <a class="action-link" href="<%= request.getContextPath() %>/dentists?dentistNumber=<%= dentist.getDentistNumber() %>">
-                                View / Edit
-                            </a>
-                        </td>
-                    </tr>
-                <% } %>
-                </tbody>
-            </table>
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Active Practicing Dentists</h2>
+                    <p class="card-subtitle">List of dental professionals currently available for appointments.</p>
+                </div>
+            </div>
+
+            <% if (dentists.isEmpty()) { %>
+                <div class="empty-state">
+                    No active dentists found in the clinic directory.
+                </div>
+            <% } else { %>
+                <div class="table-container">
+                    <table class="app-table">
+                        <thead>
+                        <tr>
+                            <th>Dentist #</th>
+                            <th>Doctor Name</th>
+                            <th>Specialization</th>
+                            <th>Contact</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <% for (Dentist d : dentists) { %>
+                            <tr>
+                                <td class="code-highlight"><%= d.getDentistNumber() %></td>
+                                <td style="font-weight: 600;"><%= d.getFullName() %></td>
+                                <td><%= d.getSpecialization() %></td>
+                                <td><%= d.getContactNumber() %></td>
+                                <td>
+                                    <span class="status <%= d.isActive() ? "status-ACTIVE" : "status-INACTIVE" %>">
+                                        <%= d.isActive() ? "Active" : "Inactive" %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <a class="action-link" href="<%= request.getContextPath() %>/dentists?dentistNumber=<%= d.getDentistNumber() %>">
+                                        View / Edit
+                                    </a>
+                                </td>
+                            </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
         </div>
     <% } %>
 
 </main>
+
+<footer class="footer">
+    Sunrise Dental Management System &bull; Professional Dental Care &amp; Clinical Operations
+</footer>
 
 </body>
 </html>

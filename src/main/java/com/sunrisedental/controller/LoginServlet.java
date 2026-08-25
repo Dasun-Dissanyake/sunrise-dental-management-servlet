@@ -55,23 +55,10 @@ public class LoginServlet extends HttpServlet {
         );
 
             } else {
-
-                request.setAttribute(
-                        "errorMessage",
-                        "Invalid username or password."
-                );
-
-                request.getRequestDispatcher(
-                        "/login.html"
-                ).forward(request, response);
+                response.sendRedirect(request.getContextPath() + "/pages/login.html?error=invalid");
             }
-
         } catch (Exception e) {
-
-            throw new ServletException(
-                    "An error occurred during login.",
-                    e
-            );
+            throw new ServletException("An error occurred during login.", e);
         }
     }
 }

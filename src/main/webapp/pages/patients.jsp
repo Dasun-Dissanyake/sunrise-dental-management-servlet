@@ -1,9 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-
 <%@ page import="java.util.List" %>
 <%@ page import="com.sunrisedental.model.Patient" %>
+<%@ page import="com.sunrisedental.model.User" %>
 
 <%
+    User user = (User) session.getAttribute("loggedInUser");
+    if (user == null) {
+        user = (User) request.getAttribute("user");
+    }
+
     List<Patient> patients =
             (List<Patient>) request.getAttribute("patients");
 
@@ -21,464 +26,287 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patients - Sunrise Dental</title>
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
-            color: #333;
-        }
-
-        .header {
-            background: #ffffff;
-            padding: 20px 30px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: 22px;
-        }
-
-        .back {
-            text-decoration: none;
-            color: #2563eb;
-        }
-
-        .container {
-            padding: 30px;
-            max-width: 1200px;
-            margin: auto;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            margin-bottom: 25px;
-            border-radius: 10px;
-            border: 1px solid #e5e5e5;
-        }
-
-        .card h2 {
-            margin-bottom: 20px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .form-group.full {
-            grid-column: span 2;
-        }
-
-        label {
-            font-weight: bold;
-        }
-
-        input,
-        select {
-            padding: 11px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        button {
-            margin-top: 20px;
-            padding: 11px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            background: #2563eb;
-            color: white;
-        }
-
-        .message {
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-        }
-
-        .error {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .search-form {
-            display: flex;
-            gap: 10px;
-        }
-
-        .search-form input {
-            flex: 1;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background: #f5f7fb;
-        }
-
-    </style>
-
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/sunrise-theme.css">
 </head>
 
 <body>
 
 <header class="header">
+    <div class="header-inner">
+        <a class="brand" href="<%= request.getContextPath() %>/dashboard">
+            <img
+                src="<%= request.getContextPath() %>/assets/images/sunrise-dental-logo.png"
+                alt="Sunrise Dental Logo"
+                class="brand-logo"
+            >
+            <div>
+                <div class="brand-name">Sunrise Dental</div>
+                <div class="brand-subtitle">Management System</div>
+            </div>
+        </a>
 
-    <h1>Sunrise Dental - Patients</h1>
-
-    <a class="back"
-       href="<%= request.getContextPath() %>/dashboard">
-        ← Dashboard
-    </a>
-
+        <div class="user-section">
+            <div class="user-info">
+                <div class="user-name"><%= user != null ? user.getFullName() : "User" %></div>
+                <div class="user-role"><%= user != null ? user.getRole() : "" %></div>
+            </div>
+            <a class="logout" href="<%= request.getContextPath() %>/logout">Logout</a>
+        </div>
+    </div>
 </header>
 
+<nav class="nav-bar">
+    <div class="nav-inner">
+        <a class="nav-link" href="<%= request.getContextPath() %>/dashboard">Dashboard</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/appointments">Appointments</a>
+        <a class="nav-link active" href="<%= request.getContextPath() %>/patients">Patients</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/dentists">Dentists</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/treatments">Treatments</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/bills">Billing</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/reports">Reports</a>
+    </div>
+</nav>
 
 <main class="container">
 
-    <% if (error != null) { %>
+    <div class="page-header">
+        <div class="page-header-text">
+            <h1>Patients</h1>
+            <p>Manage patient information and registered patient records.</p>
+        </div>
+        <div class="page-header-actions">
+            <a class="back-link" href="<%= request.getContextPath() %>/dashboard">
+                &larr; Back to Dashboard
+            </a>
+        </div>
+    </div>
 
+    <% if (error != null) { %>
         <div class="message error">
             <%= error %>
         </div>
-
     <% } %>
 
-
     <% if ("registered".equals(success)) { %>
-
         <div class="message success">
             Patient registered successfully.
         </div>
-
+    <% } else if ("updated".equals(success)) { %>
+        <div class="message success">
+            Patient updated successfully.
+        </div>
     <% } %>
 
-
     <!-- REGISTER PATIENT -->
-
     <div class="card">
-
-        <h2>Register New Patient</h2>
-
-        <form method="post"
-              action="<%= request.getContextPath() %>/patients">
-
-            <div class="form-grid">
-
-                <div class="form-group">
-
-                    <label>
-                        Patient Number
-                    </label>
-
-                    <input
-                            type="text"
-                            name="patientNumber"
-                            required
-                            maxlength="20"
-                            placeholder="e.g. P001">
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>
-                        Full Name
-                    </label>
-
-                    <input
-                            type="text"
-                            name="fullName"
-                            required
-                            maxlength="100">
-
-                </div>
-
-
-                <div class="form-group full">
-
-                    <label>
-                        Address
-                    </label>
-
-                    <input
-                            type="text"
-                            name="address"
-                            required
-                            maxlength="255">
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>
-                        Contact Number
-                    </label>
-
-                    <input
-                            type="tel"
-                            name="contactNumber"
-                            required
-                            maxlength="20">
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>
-                        Date of Birth
-                    </label>
-
-                    <input
-                            type="date"
-                            name="dateOfBirth">
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>
-                        Email
-                    </label>
-
-                    <input
-                            type="email"
-                            name="email"
-                            maxlength="100">
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>
-                        Gender
-                    </label>
-
-                    <select name="gender">
-
-                        <option value="">
-                            Select Gender
-                        </option>
-
-                        <option value="Male">
-                            Male
-                        </option>
-
-                        <option value="Female">
-                            Female
-                        </option>
-
-                        <option value="Other">
-                            Other
-                        </option>
-
-                    </select>
-
-                </div>
-
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Register New Patient</h2>
+                <p class="card-subtitle">Enter identification, personal, and contact details to enroll a patient.</p>
             </div>
-
-            <button type="submit">
-                Register Patient
-            </button>
-
-        </form>
-
-    </div>
-
-
-    <!-- SEARCH -->
-
-    <div class="card">
-
-        <h2>Search Patient</h2>
-
-        <form class="search-form"
-              method="get"
-              action="<%= request.getContextPath() %>/patients">
-
-            <input
-                    type="text"
-                    name="patientNumber"
-                    placeholder="Enter patient number"
-                    required>
-
-            <button type="submit">
-                Search
-            </button>
-
-        </form>
-
-
-        <% if (searchedPatient != null) { %>
-
-            <table>
-
-                <tr>
-                    <th>Patient Number</th>
-                    <td>
-                        <%= searchedPatient.getPatientNumber() %>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>Name</th>
-                    <td>
-                        <%= searchedPatient.getFullName() %>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>Address</th>
-                    <td>
-                        <%= searchedPatient.getAddress() %>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>Contact</th>
-                    <td>
-                        <%= searchedPatient.getContactNumber() %>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>Email</th>
-                    <td>
-                        <%= searchedPatient.getEmail() %>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>Gender</th>
-                    <td>
-                        <%= searchedPatient.getGender() %>
-                    </td>
-                </tr>
-
-            </table>
-
-        <% } else if (request.getParameter("patientNumber") != null) { %>
-
-            <div class="message error">
-                No patient found with that patient number.
-            </div>
-
-        <% } %>
-
-    </div>
-
-
-    <!-- PATIENT LIST -->
-
-    <% if (patients != null) { %>
-
-        <div class="card">
-
-            <h2>Registered Patients</h2>
-
-            <table>
-
-                <thead>
-
-                <tr>
-                    <th>Patient Number</th>
-                    <th>Name</th>
-                    <th>Contact</th>
-                    <th>Email</th>
-                    <th>Gender</th>
-                </tr>
-
-                </thead>
-
-                <tbody>
-
-                <% for (Patient patient : patients) { %>
-
-                    <tr>
-
-                        <td>
-                            <%= patient.getPatientNumber() %>
-                        </td>
-
-                        <td>
-                            <%= patient.getFullName() %>
-                        </td>
-
-                        <td>
-                            <%= patient.getContactNumber() %>
-                        </td>
-
-                        <td>
-                            <%= patient.getEmail() %>
-                        </td>
-
-                        <td>
-                            <%= patient.getGender() %>
-                        </td>
-
-                    </tr>
-
-                <% } %>
-
-                </tbody>
-
-            </table>
-
         </div>
 
+        <form method="post" action="<%= request.getContextPath() %>/patients">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="patientNumber">Patient Number <span class="required-indicator">*</span></label>
+                    <input
+                        type="text"
+                        id="patientNumber"
+                        name="patientNumber"
+                        required
+                        maxlength="20"
+                        placeholder="e.g. PAT-001"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="fullName">Full Name <span class="required-indicator">*</span></label>
+                    <input
+                        type="text"
+                        id="fullName"
+                        name="fullName"
+                        required
+                        maxlength="100"
+                        placeholder="Enter full name"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="contactNumber">Contact Number <span class="required-indicator">*</span></label>
+                    <input
+                        type="tel"
+                        id="contactNumber"
+                        name="contactNumber"
+                        required
+                        maxlength="20"
+                        placeholder="e.g. 0771234567"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="dateOfBirth">Date of Birth</label>
+                    <input
+                        type="date"
+                        id="dateOfBirth"
+                        name="dateOfBirth"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        maxlength="100"
+                        placeholder="e.g. patient@example.com"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender">
+                        <option value="">-- Select Gender --</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group full">
+                    <label for="address">Residential Address <span class="required-indicator">*</span></label>
+                    <input
+                        type="text"
+                        id="address"
+                        name="address"
+                        required
+                        maxlength="255"
+                        placeholder="Enter street, city, and postal code"
+                    >
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Register Patient</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- SEARCH PATIENT -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Search Patient</h2>
+                <p class="card-subtitle">Find registered patient records by patient number.</p>
+            </div>
+        </div>
+
+        <form class="search-form" method="get" action="<%= request.getContextPath() %>/patients">
+            <input
+                type="text"
+                name="patientNumber"
+                placeholder="Enter patient number (e.g. PAT-001)"
+                required
+            >
+            <button type="submit" class="btn btn-dark">Search Patient</button>
+        </form>
+
+        <% if (searchedPatient != null) { %>
+            <div style="margin-top: 24px;">
+                <div class="details-grid">
+                    <div class="detail-box">
+                        <div class="detail-label">Patient Number</div>
+                        <div class="detail-value"><%= searchedPatient.getPatientNumber() %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Full Name</div>
+                        <div class="detail-value"><%= searchedPatient.getFullName() %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Contact Number</div>
+                        <div class="detail-value"><%= searchedPatient.getContactNumber() %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Date of Birth</div>
+                        <div class="detail-value"><%= searchedPatient.getDateOfBirth() != null ? searchedPatient.getDateOfBirth() : "-" %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value" style="font-size: 14px;"><%= searchedPatient.getEmail() != null && !searchedPatient.getEmail().isEmpty() ? searchedPatient.getEmail() : "-" %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Gender</div>
+                        <div class="detail-value"><%= searchedPatient.getGender() != null && !searchedPatient.getGender().isEmpty() ? searchedPatient.getGender() : "-" %></div>
+                    </div>
+                    <div class="detail-box full" style="grid-column: 1 / -1;">
+                        <div class="detail-label">Address</div>
+                        <div class="detail-value" style="font-weight: 500; font-size: 14px;"><%= searchedPatient.getAddress() != null ? searchedPatient.getAddress() : "-" %></div>
+                    </div>
+                </div>
+            </div>
+        <% } else if (request.getParameter("patientNumber") != null) { %>
+            <div class="message error" style="margin-top: 20px; margin-bottom: 0;">
+                No patient found with that patient number.
+            </div>
+        <% } %>
+    </div>
+
+    <!-- REGISTERED PATIENTS TABLE -->
+    <% if (patients != null) { %>
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Registered Patients Directory</h2>
+                    <p class="card-subtitle">All active patient profiles enrolled in the clinic database.</p>
+                </div>
+            </div>
+
+            <% if (patients.isEmpty()) { %>
+                <div class="empty-state">
+                    No patients registered in the system.
+                </div>
+            <% } else { %>
+                <div class="table-container">
+                    <table class="app-table">
+                        <thead>
+                        <tr>
+                            <th>Patient #</th>
+                            <th>Full Name</th>
+                            <th>Contact</th>
+                            <th>Date of Birth</th>
+                            <th>Gender</th>
+                            <th>Address</th>
+                            <th>Email</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <% for (Patient p : patients) { %>
+                            <tr>
+                                <td class="code-highlight"><%= p.getPatientNumber() %></td>
+                                <td style="font-weight: 600;"><%= p.getFullName() %></td>
+                                <td><%= p.getContactNumber() %></td>
+                                <td><%= p.getDateOfBirth() != null ? p.getDateOfBirth() : "-" %></td>
+                                <td><%= p.getGender() != null && !p.getGender().isEmpty() ? p.getGender() : "-" %></td>
+                                <td style="color: var(--muted); max-width: 200px; white-space: normal;"><%= p.getAddress() != null ? p.getAddress() : "-" %></td>
+                                <td><%= p.getEmail() != null && !p.getEmail().isEmpty() ? p.getEmail() : "-" %></td>
+                            </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
+        </div>
     <% } %>
 
 </main>
 
-</body>
+<footer class="footer">
+    Sunrise Dental Management System &bull; Professional Dental Care &amp; Clinical Operations
+</footer>
 
+</body>
 </html>

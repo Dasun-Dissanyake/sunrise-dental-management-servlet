@@ -4,132 +4,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Sunrise Dental - Login</title>
-
+    <title>Login - Sunrise Dental Management System</title>
+    <link rel="stylesheet" href="../css/sunrise-theme.css">
     <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f7fb;
-
-            display: flex;
             justify-content: center;
             align-items: center;
-
+            padding: 24px;
             min-height: 100vh;
         }
 
-        .login-container {
-            width: 380px;
-            background: white;
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+            margin: auto;
+        }
 
-            padding: 40px;
+        .login-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
 
+        .login-logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
             border-radius: 12px;
-
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            margin-bottom: 12px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
         }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
+        .login-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--dark);
+            letter-spacing: -0.5px;
         }
 
-        .subtitle {
-            text-align: center;
-            color: #777;
-            margin-bottom: 30px;
+        .login-subtitle {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-top: 4px;
         }
 
-        label {
-            display: block;
+        .login-card {
+            background: var(--white);
+            padding: 36px 32px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            border-top: 4px solid var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
             margin-bottom: 6px;
-            font-weight: bold;
         }
 
-        input {
-            width: 100%;
-            padding: 12px;
-
+        .login-card p {
+            font-size: 13px;
+            color: var(--muted);
             margin-bottom: 20px;
-
-            border: 1px solid #ccc;
-            border-radius: 6px;
         }
 
-        button {
-            width: 100%;
-
-            padding: 12px;
-
-            border: none;
-            border-radius: 6px;
-
-            background: #1976d2;
-            color: white;
-
-            font-size: 16px;
-
-            cursor: pointer;
+        .login-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: var(--muted);
         }
-
-        button:hover {
-            background: #125ea7;
-        }
-
     </style>
-
 </head>
 
 <body>
 
-<div class="login-container">
+<div class="login-wrapper">
 
-    <h1>Sunrise Dental</h1>
-
-    <p class="subtitle">
-        Staff Management System
-    </p>
-
-    <form action="../login" method="post">
-
-        <label for="username">
-            Username
-        </label>
-
-        <input
-                type="text"
-                id="username"
-                name="username"
-                placeholder="Enter username"
-                required
+    <div class="login-header">
+        <img
+            src="../assets/images/sunrise-dental-logo.png"
+            alt="Sunrise Dental Logo"
+            class="login-logo"
         >
+        <div class="login-title">Sunrise Dental</div>
+        <div class="login-subtitle">Management System</div>
+    </div>
 
-        <label for="password">
-            Password
-        </label>
+    <div class="login-card">
+        <h2>Staff Sign In</h2>
+        <p>Enter your credentials to access the management portal.</p>
 
-        <input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="Enter password"
-                required
-        >
+        <div id="loginAlert" class="message error" style="display: none; margin-bottom: 18px;">
+            Invalid username or password.
+        </div>
 
-        <button type="submit">
-            Login
-        </button>
+        <form id="loginForm" action="../login" method="post">
 
-    </form>
+            <div class="form-group" style="margin-bottom: 18px;">
+                <label for="username">Username <span class="required-indicator">*</span></label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Enter staff username"
+                    required
+                    autocomplete="username"
+                >
+            </div>
+
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label for="password">Password <span class="required-indicator">*</span></label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter password"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px 18px; font-size: 14px;">
+                Sign In to Dashboard
+            </button>
+
+        </form>
+    </div>
+
+    <div class="login-footer">
+        Sunrise Dental Management System &bull; Secure Staff Portal
+    </div>
 
 </div>
+
+<script>
+    (function() {
+        // Check for error in query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const alertBox = document.getElementById('loginAlert');
+        if (urlParams.get('error') === 'invalid') {
+            alertBox.innerText = 'Invalid username or password.';
+            alertBox.style.display = 'flex';
+        }
+
+        // Frontend validation
+        const form = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+
+        form.addEventListener('submit', function(event) {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!username) {
+                event.preventDefault();
+                alertBox.innerText = 'Please enter your username.';
+                alertBox.style.display = 'flex';
+                usernameInput.focus();
+                return;
+            }
+
+            if (!password) {
+                event.preventDefault();
+                alertBox.innerText = 'Please enter your password.';
+                alertBox.style.display = 'flex';
+                passwordInput.focus();
+                return;
+            }
+        });
+    })();
+</script>
 
 </body>
 

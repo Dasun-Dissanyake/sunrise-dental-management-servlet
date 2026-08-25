@@ -6,7 +6,10 @@
 <%@ page import="java.util.List" %>
 
 <%
-    User user = (User) request.getAttribute("user");
+    User user = (User) session.getAttribute("loggedInUser");
+    if (user == null) {
+        user = (User) request.getAttribute("user");
+    }
 
     String startDate =
             request.getAttribute("startDate") != null
@@ -70,711 +73,308 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports - Sunrise Dental</title>
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
-            color: #333;
-        }
-
-        .header {
-            background: #ffffff;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .logo {
-            font-size: 22px;
-            font-weight: bold;
-        }
-
-        .user-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logout {
-            text-decoration: none;
-            padding: 8px 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            color: #333;
-            background: #fff;
-        }
-
-        .logout:hover {
-            background: #f5f5f5;
-        }
-
-        .container {
-            padding: 30px;
-            max-width: 1400px;
-            margin: auto;
-        }
-
-        .page-header {
-            margin-bottom: 25px;
-        }
-
-        .page-header h1 {
-            margin-bottom: 8px;
-        }
-
-        .page-header p {
-            color: #6b7280;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            text-decoration: none;
-            color: #2563eb;
-        }
-
-        .filter-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            border: 1px solid #e5e5e5;
-            margin-bottom: 25px;
-        }
-
-        .filter-card h2 {
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-
-        .filter-form {
-            display: flex;
-            align-items: end;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-        }
-
-        .form-group label {
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .form-group input {
-            padding: 10px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .btn {
-            padding: 10px 18px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-primary {
-            background: #2563eb;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-
-        .btn-secondary {
-            background: #ffffff;
-            color: #333;
-            border: 1px solid #d1d5db;
-        }
-
-        .btn-secondary:hover {
-            background: #f5f5f5;
-        }
-
-        .error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-            padding: 12px 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-
-        .section {
-            margin-bottom: 30px;
-        }
-
-        .section h2 {
-            margin-bottom: 15px;
-            font-size: 21px;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(
-                auto-fit,
-                minmax(200px, 1fr)
-            );
-            gap: 20px;
-        }
-
-        .summary-card {
-            background: white;
-            padding: 22px;
-            border-radius: 10px;
-            border: 1px solid #e5e5e5;
-        }
-
-        .summary-label {
-            color: #6b7280;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .summary-value {
-            font-size: 25px;
-            font-weight: bold;
-            color: #111827;
-        }
-
-        .revenue {
-            color: #166534;
-        }
-
-        .table-card {
-            background: white;
-            border-radius: 10px;
-            border: 1px solid #e5e5e5;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 14px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        th {
-            background: #f9fafb;
-            color: #6b7280;
-            font-size: 13px;
-        }
-
-        td {
-            font-size: 14px;
-        }
-
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .empty {
-            text-align: center;
-            padding: 30px;
-            color: #6b7280;
-        }
-
-        .print-section {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 20px;
-        }
-
-        @media print {
-
-            body {
-                background: white;
-            }
-
-            .header,
-            .filter-card,
-            .back-link,
-            .print-section {
-                display: none;
-            }
-
-            .container {
-                padding: 0;
-                max-width: none;
-            }
-
-            .summary-card,
-            .table-card {
-                border: 1px solid #ccc;
-            }
-
-            .section {
-                page-break-inside: avoid;
-            }
-        }
-
-        @media (max-width: 700px) {
-
-            .header {
-                padding: 0 15px;
-            }
-
-            .container {
-                padding: 20px 15px;
-            }
-
-            .filter-form {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .form-group input {
-                width: 100%;
-            }
-
-            .btn {
-                width: 100%;
-            }
-        }
-
-    </style>
-
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/sunrise-theme.css">
 </head>
 
 <body>
 
 <header class="header">
-
-    <div class="logo">
-        Sunrise Dental
-    </div>
-
-    <div class="user-section">
-
-        <span>
-            <%= user != null ? user.getFullName() : "Administrator" %>
-        </span>
-
-        <a class="logout"
-           href="<%= request.getContextPath() %>/logout">
-            Logout
+    <div class="header-inner">
+        <a class="brand" href="<%= request.getContextPath() %>/dashboard">
+            <img
+                src="<%= request.getContextPath() %>/assets/images/sunrise-dental-logo.png"
+                alt="Sunrise Dental Logo"
+                class="brand-logo"
+            >
+            <div>
+                <div class="brand-name">Sunrise Dental</div>
+                <div class="brand-subtitle">Management System</div>
+            </div>
         </a>
 
+        <div class="user-section">
+            <div class="user-info">
+                <div class="user-name"><%= user != null ? user.getFullName() : "User" %></div>
+                <div class="user-role"><%= user != null ? user.getRole() : "" %></div>
+            </div>
+            <a class="logout" href="<%= request.getContextPath() %>/logout">Logout</a>
+        </div>
     </div>
-
 </header>
+
+<nav class="nav-bar">
+    <div class="nav-inner">
+        <a class="nav-link" href="<%= request.getContextPath() %>/dashboard">Dashboard</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/appointments">Appointments</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/patients">Patients</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/dentists">Dentists</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/treatments">Treatments</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/bills">Billing</a>
+        <a class="nav-link active" href="<%= request.getContextPath() %>/reports">Reports</a>
+    </div>
+</nav>
 
 <main class="container">
 
-    <a class="back-link"
-       href="<%= request.getContextPath() %>/dashboard">
-        ← Back to Dashboard
-    </a>
-
     <div class="page-header">
-
-        <h1>Reports</h1>
-
-        <p>
-            View appointment, revenue, treatment, dentist and patient reports.
-        </p>
-
+        <div class="page-header-text">
+            <h1>Reports</h1>
+            <p>View financial, treatment, dentist and patient reports.</p>
+        </div>
+        <div class="page-header-actions">
+            <a class="btn btn-secondary" href="<%= request.getContextPath() %>/reports/appointments">
+                Appointment Status Report &rarr;
+            </a>
+            <a class="back-link" href="<%= request.getContextPath() %>/dashboard">
+                &larr; Back to Dashboard
+            </a>
+        </div>
     </div>
 
     <% if (error != null) { %>
-
-        <div class="error">
+        <div class="message error">
             <%= error %>
         </div>
-
     <% } %>
 
     <!-- DATE FILTER -->
+    <div class="filter-card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Report Date Range</h2>
+                <p class="card-subtitle">Select date range to filter financial and performance records.</p>
+            </div>
+        </div>
 
-    <section class="filter-card">
-
-        <h2>Report Date Range</h2>
-
-        <form class="filter-form"
-              method="get"
-              action="<%= request.getContextPath() %>/reports">
-
+        <form class="filter-form" method="get" action="<%= request.getContextPath() %>/reports">
             <div class="form-group">
-
-                <label for="startDate">
-                    Start Date
-                </label>
-
+                <label for="startDate">Start Date <span class="required-indicator">*</span></label>
                 <input
-                        type="date"
-                        id="startDate"
-                        name="startDate"
-                        value="<%= startDate %>"
-                        required>
-
+                    type="date"
+                    id="startDate"
+                    name="startDate"
+                    value="<%= startDate %>"
+                    required
+                >
             </div>
 
             <div class="form-group">
-
-                <label for="endDate">
-                    End Date
-                </label>
-
+                <label for="endDate">End Date <span class="required-indicator">*</span></label>
                 <input
-                        type="date"
-                        id="endDate"
-                        name="endDate"
-                        value="<%= endDate %>"
-                        required>
-
+                    type="date"
+                    id="endDate"
+                    name="endDate"
+                    value="<%= endDate %>"
+                    required
+                >
             </div>
 
-            <button
-                    type="submit"
-                    class="btn btn-primary">
+            <button type="submit" class="btn btn-primary">
                 Generate Report
             </button>
 
+            <button type="button" class="btn btn-secondary" onclick="window.print()">
+                Print Report
+            </button>
         </form>
-
-    </section>
-
-    <div class="print-section">
-
-        <button
-                type="button"
-                class="btn btn-secondary"
-                onclick="window.print()">
-            Print Report
-        </button>
-
     </div>
 
     <!-- REVENUE SUMMARY -->
-
-    <section class="section">
-
-        <h2>Revenue Summary</h2>
+    <section style="margin-bottom: 32px;">
+        <div class="section-heading">
+            <div>
+                <h2>Revenue Summary</h2>
+                <p>Overall financial breakdown of clinical revenues and billing metrics.</p>
+            </div>
+        </div>
 
         <div class="summary-grid">
-
-            <div class="summary-card">
-
-                <div class="summary-label">
-                    Total Revenue
-                </div>
-
+            <div class="summary-card" style="border-top-color: var(--primary);">
+                <div class="summary-label">Total Revenue</div>
                 <div class="summary-value revenue">
-                    Rs. <%= String.format(
-                            "%,.2f",
-                            totalRevenue
-                    ) %>
+                    Rs. <%= String.format("%,.2f", totalRevenue) %>
                 </div>
-
             </div>
 
             <div class="summary-card">
-
-                <div class="summary-label">
-                    Consultation Fees
-                </div>
-
+                <div class="summary-label">Consultation Fees</div>
                 <div class="summary-value">
-                    Rs. <%= String.format(
-                            "%,.2f",
-                            totalConsultationFees
-                    ) %>
+                    Rs. <%= String.format("%,.2f", totalConsultationFees) %>
                 </div>
-
             </div>
 
             <div class="summary-card">
-
-                <div class="summary-label">
-                    Treatment Revenue
-                </div>
-
+                <div class="summary-label">Treatment Revenue</div>
                 <div class="summary-value">
-                    Rs. <%= String.format(
-                            "%,.2f",
-                            totalTreatmentRevenue
-                    ) %>
+                    Rs. <%= String.format("%,.2f", totalTreatmentRevenue) %>
                 </div>
-
             </div>
 
             <div class="summary-card">
-
-                <div class="summary-label">
-                    Total Bills
-                </div>
-
+                <div class="summary-label">Total Invoices</div>
                 <div class="summary-value">
                     <%= totalBills %>
                 </div>
-
             </div>
 
             <div class="summary-card">
-
-                <div class="summary-label">
-                    Average Bill
-                </div>
-
+                <div class="summary-label">Average Bill</div>
                 <div class="summary-value">
-                    Rs. <%= String.format(
-                            "%,.2f",
-                            averageBillAmount
-                    ) %>
+                    Rs. <%= String.format("%,.2f", averageBillAmount) %>
                 </div>
-
             </div>
-
         </div>
-
     </section>
 
     <!-- TREATMENT REPORT -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Treatment Performance</h2>
+                <p class="card-subtitle">Appointment volumes and revenue generated per treatment type.</p>
+            </div>
+        </div>
 
-    <section class="section">
-
-        <h2>Treatment Performance</h2>
-
-        <div class="table-card">
-
-            <table>
-
-                <thead>
-
-                <tr>
-                    <th>Treatment</th>
-                    <th>Appointments</th>
-                    <th>Revenue</th>
-                </tr>
-
-                </thead>
-
-                <tbody>
-
-                <% if (treatmentReports != null &&
-                       !treatmentReports.isEmpty()) { %>
-
-                    <% for (TreatmentReport report :
-                            treatmentReports) { %>
-
+        <% if (treatmentReports != null && !treatmentReports.isEmpty()) { %>
+            <div class="table-container">
+                <table class="app-table">
+                    <thead>
+                    <tr>
+                        <th>Treatment</th>
+                        <th>Appointments</th>
+                        <th>Revenue</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <% for (TreatmentReport report : treatmentReports) { %>
                         <tr>
-
-                            <td>
+                            <td style="font-weight: 600;">
                                 <%= report.getTreatmentName() %>
                             </td>
-
                             <td>
                                 <%= report.getAppointmentCount() %>
                             </td>
-
-                            <td>
-                                Rs.
-                                <%= String.format(
-                                        "%,.2f",
-                                        report.getRevenue()
-                                ) %>
+                            <td class="price" style="color: var(--primary-dark);">
+                                Rs. <%= String.format("%,.2f", report.getRevenue()) %>
                             </td>
-
                         </tr>
-
                     <% } %>
-
-                <% } else { %>
-
-                    <tr>
-                        <td colspan="3" class="empty">
-                            No treatment data available for this date range.
-                        </td>
-                    </tr>
-
-                <% } %>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </section>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="empty-state">
+                No treatment data available for this date range.
+            </div>
+        <% } %>
+    </div>
 
     <!-- DENTIST REPORT -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Dentist Performance</h2>
+                <p class="card-subtitle">Consultation volume, completed appointments, cancellations and no-shows per doctor.</p>
+            </div>
+        </div>
 
-    <section class="section">
-
-        <h2>Dentist Performance</h2>
-
-        <div class="table-card">
-
-            <table>
-
-                <thead>
-
-                <tr>
-                    <th>Dentist</th>
-                    <th>Total Appointments</th>
-                    <th>Completed</th>
-                    <th>Cancelled</th>
-                    <th>No Show</th>
-                </tr>
-
-                </thead>
-
-                <tbody>
-
-                <% if (dentistReports != null &&
-                       !dentistReports.isEmpty()) { %>
-
-                    <% for (DentistReport report :
-                            dentistReports) { %>
-
+        <% if (dentistReports != null && !dentistReports.isEmpty()) { %>
+            <div class="table-container">
+                <table class="app-table">
+                    <thead>
+                    <tr>
+                        <th>Dentist</th>
+                        <th>Total Appointments</th>
+                        <th>Completed</th>
+                        <th>Cancelled</th>
+                        <th>No Show</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <% for (DentistReport report : dentistReports) { %>
                         <tr>
-
-                            <td>
+                            <td style="font-weight: 600;">
                                 <%= report.getDentistName() %>
                             </td>
-
                             <td>
-                                <%= report.getTotalAppointments() %>
+                                <strong><%= report.getTotalAppointments() %></strong>
                             </td>
-
                             <td>
-                                <%= report.getCompletedAppointments() %>
+                                <span class="status status-COMPLETED"><%= report.getCompletedAppointments() %></span>
                             </td>
-
                             <td>
-                                <%= report.getCancelledAppointments() %>
+                                <span class="status status-CANCELLED"><%= report.getCancelledAppointments() %></span>
                             </td>
-
                             <td>
-                                <%= report.getNoShowAppointments() %>
+                                <span class="status status-NO_SHOW"><%= report.getNoShowAppointments() %></span>
                             </td>
-
                         </tr>
-
                     <% } %>
-
-                <% } else { %>
-
-                    <tr>
-                        <td colspan="5" class="empty">
-                            No dentist data available for this date range.
-                        </td>
-                    </tr>
-
-                <% } %>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </section>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="empty-state">
+                No dentist data available for this date range.
+            </div>
+        <% } %>
+    </div>
 
     <!-- PATIENT REPORT -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Patient Activity</h2>
+                <p class="card-subtitle">Patient booking statistics and date of last visit.</p>
+            </div>
+        </div>
 
-    <section class="section">
-
-        <h2>Patient Activity</h2>
-
-        <div class="table-card">
-
-            <table>
-
-                <thead>
-
-                <tr>
-                    <th>Patient</th>
-                    <th>Total Appointments</th>
-                    <th>Completed</th>
-                    <th>Last Appointment</th>
-                </tr>
-
-                </thead>
-
-                <tbody>
-
-                <% if (patientReports != null &&
-                       !patientReports.isEmpty()) { %>
-
-                    <% for (PatientReport report :
-                            patientReports) { %>
-
+        <% if (patientReports != null && !patientReports.isEmpty()) { %>
+            <div class="table-container">
+                <table class="app-table">
+                    <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Total Appointments</th>
+                        <th>Completed</th>
+                        <th>Last Appointment</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <% for (PatientReport report : patientReports) { %>
                         <tr>
-
-                            <td>
+                            <td style="font-weight: 600;">
                                 <%= report.getPatientName() %>
                             </td>
-
                             <td>
                                 <%= report.getTotalAppointments() %>
                             </td>
-
                             <td>
-                                <%= report.getCompletedAppointments() %>
+                                <span class="status status-COMPLETED"><%= report.getCompletedAppointments() %></span>
                             </td>
-
                             <td>
-                                <%= report.getLastAppointment() != null
-                                        ? report.getLastAppointment()
-                                        : "-" %>
+                                <%= report.getLastAppointment() != null ? report.getLastAppointment() : "-" %>
                             </td>
-
                         </tr>
-
                     <% } %>
-
-                <% } else { %>
-
-                    <tr>
-                        <td colspan="4" class="empty">
-                            No patient data available for this date range.
-                        </td>
-                    </tr>
-
-                <% } %>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </section>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="empty-state">
+                No patient data available for this date range.
+            </div>
+        <% } %>
+    </div>
 
 </main>
 
-</body>
+<footer class="footer">
+    Sunrise Dental Management System &bull; Professional Dental Care &amp; Clinical Operations
+</footer>
 
+</body>
 </html>

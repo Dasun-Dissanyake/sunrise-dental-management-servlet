@@ -3,13 +3,20 @@
 <%@ page import="java.util.Map" %>
 
 <%
-    User user = (User) request.getAttribute("user");
+    User user = (User) session.getAttribute("loggedInUser");
+    if (user == null) {
+        user = (User) request.getAttribute("user");
+    }
 
     String startDate =
-            String.valueOf(request.getAttribute("startDate"));
+            request.getAttribute("startDate") != null
+                    ? String.valueOf(request.getAttribute("startDate"))
+                    : "";
 
     String endDate =
-            String.valueOf(request.getAttribute("endDate"));
+            request.getAttribute("endDate") != null
+                    ? String.valueOf(request.getAttribute("endDate"))
+                    : "";
 
     Integer totalAppointments =
             (Integer) request.getAttribute("totalAppointments");
@@ -28,413 +35,190 @@
     int noShow = 0;
 
     if (statusReport != null) {
-
-        scheduled =
-                statusReport.getOrDefault(
-                        "SCHEDULED", 0);
-
-        completed =
-                statusReport.getOrDefault(
-                        "COMPLETED", 0);
-
-        cancelled =
-                statusReport.getOrDefault(
-                        "CANCELLED", 0);
-
-        noShow =
-                statusReport.getOrDefault(
-                        "NO_SHOW", 0);
+        scheduled = statusReport.getOrDefault("SCHEDULED", 0);
+        completed = statusReport.getOrDefault("COMPLETED", 0);
+        cancelled = statusReport.getOrDefault("CANCELLED", 0);
+        noShow = statusReport.getOrDefault("NO_SHOW", 0);
     }
 %>
 
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Appointment Report - Sunrise Dental</title>
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
-            color: #333;
-        }
-
-        .header {
-            background: #fff;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .logo {
-            font-size: 22px;
-            font-weight: bold;
-        }
-
-        .user-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logout {
-            text-decoration: none;
-            padding: 8px 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            color: #333;
-        }
-
-        .container {
-            padding: 30px;
-        }
-
-        .page-header {
-            margin-bottom: 25px;
-        }
-
-        .page-header h1 {
-            margin-bottom: 8px;
-        }
-
-        .filter-card,
-        .summary-card,
-        .report-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            border: 1px solid #e5e5e5;
-            margin-bottom: 25px;
-        }
-
-        .filters {
-            display: flex;
-            gap: 20px;
-            align-items: end;
-            flex-wrap: wrap;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-group label {
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .form-group input {
-            padding: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-        }
-
-        .btn {
-            padding: 10px 18px;
-            border: none;
-            border-radius: 6px;
-            background: #2563eb;
-            color: white;
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            background: #1d4ed8;
-        }
-
-        .summary-value {
-            font-size: 32px;
-            font-weight: bold;
-        }
-
-        .report-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .report-table th,
-        .report-table td {
-            padding: 14px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        .report-table th {
-            background: #f9fafb;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #2563eb;
-            text-decoration: none;
-        }
-
-        @media print {
-
-            .header,
-            .filter-card,
-            .back-link {
-                display: none;
-            }
-
-            body {
-                background: white;
-            }
-
-            .container {
-                padding: 0;
-            }
-
-        }
-
-    </style>
-
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/sunrise-theme.css">
 </head>
 
 <body>
 
 <header class="header">
-
-    <div class="logo">
-        Sunrise Dental
-    </div>
-
-    <div class="user-section">
-
-        <span>
-            <%= user.getFullName() %>
-        </span>
-
-        <a
-            class="logout"
-            href="<%= request.getContextPath() %>/logout">
-
-            Logout
-
+    <div class="header-inner">
+        <a class="brand" href="<%= request.getContextPath() %>/dashboard">
+            <img
+                src="<%= request.getContextPath() %>/assets/images/sunrise-dental-logo.png"
+                alt="Sunrise Dental Logo"
+                class="brand-logo"
+            >
+            <div>
+                <div class="brand-name">Sunrise Dental</div>
+                <div class="brand-subtitle">Management System</div>
+            </div>
         </a>
 
+        <div class="user-section">
+            <div class="user-info">
+                <div class="user-name"><%= user != null ? user.getFullName() : "User" %></div>
+                <div class="user-role"><%= user != null ? user.getRole() : "" %></div>
+            </div>
+            <a class="logout" href="<%= request.getContextPath() %>/logout">Logout</a>
+        </div>
     </div>
-
 </header>
 
+<nav class="nav-bar">
+    <div class="nav-inner">
+        <a class="nav-link" href="<%= request.getContextPath() %>/dashboard">Dashboard</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/appointments">Appointments</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/patients">Patients</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/dentists">Dentists</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/treatments">Treatments</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/bills">Billing</a>
+        <a class="nav-link active" href="<%= request.getContextPath() %>/reports">Reports</a>
+    </div>
+</nav>
 
 <main class="container">
 
-    <a
-        class="back-link"
-        href="<%= request.getContextPath() %>/dashboard">
+    <div class="page-header">
+        <div class="page-header-text">
+            <h1>Appointment Report</h1>
+            <p>View appointment statistics for a selected date range.</p>
+        </div>
+        <div class="page-header-actions">
+            <a class="btn btn-secondary" href="<%= request.getContextPath() %>/reports">
+                &larr; Main Reports
+            </a>
+            <a class="back-link" href="<%= request.getContextPath() %>/dashboard">
+                &larr; Back to Dashboard
+            </a>
+        </div>
+    </div>
 
-        ← Back to Dashboard
-
-    </a>
-
-
-    <section class="page-header">
-
-        <h1>
-            Appointment Report
-        </h1>
-
-        <p>
-            View appointment statistics for a selected date range.
-        </p>
-
-    </section>
-
-
-    <!-- Date Filter -->
-
-    <section class="filter-card">
-
-        <form
-            method="get"
-            action="<%= request.getContextPath() %>/reports/appointments">
-
-            <div class="filters">
-
-                <div class="form-group">
-
-                    <label for="startDate">
-                        Start Date
-                    </label>
-
-                    <input
-                        type="date"
-                        id="startDate"
-                        name="startDate"
-                        value="<%= startDate %>"
-                        required>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="endDate">
-                        End Date
-                    </label>
-
-                    <input
-                        type="date"
-                        id="endDate"
-                        name="endDate"
-                        value="<%= endDate %>"
-                        required>
-
-                </div>
-
-
-                <button
-                    type="submit"
-                    class="btn">
-
-                    Generate Report
-
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn"
-                    onclick="window.print()">
-
-                    Print Report
-
-                </button>
-
+    <!-- DATE FILTER -->
+    <div class="filter-card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Filter Date Range</h2>
+                <p class="card-subtitle">Select date range to view appointment status distributions.</p>
             </div>
-
-        </form>
-
-    </section>
-
-
-    <!-- Summary -->
-
-    <section class="summary-card">
-
-        <div>
-
-            <p>
-                Total Appointments
-            </p>
-
-            <div class="summary-value">
-
-                <%= totalAppointments %>
-
-            </div>
-
         </div>
 
-    </section>
+        <form class="filter-form" method="get" action="<%= request.getContextPath() %>/reports/appointments">
+            <div class="form-group">
+                <label for="startDate">Start Date <span class="required-indicator">*</span></label>
+                <input
+                    type="date"
+                    id="startDate"
+                    name="startDate"
+                    value="<%= !"null".equals(startDate) ? startDate : "" %>"
+                    required
+                >
+            </div>
 
+            <div class="form-group">
+                <label for="endDate">End Date <span class="required-indicator">*</span></label>
+                <input
+                    type="date"
+                    id="endDate"
+                    name="endDate"
+                    value="<%= !"null".equals(endDate) ? endDate : "" %>"
+                    required
+                >
+            </div>
 
-    <!-- Report -->
+            <button type="submit" class="btn btn-primary">
+                Generate Report
+            </button>
 
-    <section class="report-card">
+            <button type="button" class="btn btn-secondary" onclick="window.print()">
+                Print Report
+            </button>
+        </form>
+    </div>
 
-        <h2 style="margin-bottom: 20px;">
-            Appointment Status
-        </h2>
+    <!-- SUMMARY -->
+    <div class="summary-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+        <div class="summary-card" style="border-top-color: var(--primary);">
+            <div class="summary-label">Total Appointments</div>
+            <div class="summary-value" style="font-size: 32px; color: var(--dark);">
+                <%= totalAppointments %>
+            </div>
+        </div>
+    </div>
 
-        <table class="report-table">
+    <!-- REPORT TABLE -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Appointment Status</h2>
+                <p class="card-subtitle">Categorization of appointments during the selected period.</p>
+            </div>
+        </div>
 
-            <thead>
-
-            <tr>
-
-                <th>
-                    Status
-                </th>
-
-                <th>
-                    Number of Appointments
-                </th>
-
-            </tr>
-
-            </thead>
-
-            <tbody>
-
-            <tr>
-
-                <td>
-                    Scheduled
-                </td>
-
-                <td>
-                    <%= scheduled %>
-                </td>
-
-            </tr>
-
-            <tr>
-
-                <td>
-                    Completed
-                </td>
-
-                <td>
-                    <%= completed %>
-                </td>
-
-            </tr>
-
-            <tr>
-
-                <td>
-                    Cancelled
-                </td>
-
-                <td>
-                    <%= cancelled %>
-                </td>
-
-            </tr>
-
-            <tr>
-
-                <td>
-                    No Show
-                </td>
-
-                <td>
-                    <%= noShow %>
-                </td>
-
-            </tr>
-
-            </tbody>
-
-        </table>
-
-    </section>
+        <div class="table-container">
+            <table class="app-table">
+                <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Number of Appointments</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <span class="status status-SCHEDULED">Scheduled</span>
+                    </td>
+                    <td style="font-weight: 700; font-size: 15px;">
+                        <%= scheduled %>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="status status-COMPLETED">Completed</span>
+                    </td>
+                    <td style="font-weight: 700; font-size: 15px;">
+                        <%= completed %>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="status status-CANCELLED">Cancelled</span>
+                    </td>
+                    <td style="font-weight: 700; font-size: 15px;">
+                        <%= cancelled %>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="status status-NO_SHOW">No Show</span>
+                    </td>
+                    <td style="font-weight: 700; font-size: 15px;">
+                        <%= noShow %>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
 </main>
 
-</body>
+<footer class="footer">
+    Sunrise Dental Management System &bull; Professional Dental Care &amp; Clinical Operations
+</footer>
 
+</body>
 </html>

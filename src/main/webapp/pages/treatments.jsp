@@ -1,9 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-
 <%@ page import="java.util.List" %>
 <%@ page import="com.sunrisedental.model.Treatment" %>
+<%@ page import="com.sunrisedental.model.User" %>
 
 <%
+    User user = (User) session.getAttribute("loggedInUser");
+    if (user == null) {
+        user = (User) request.getAttribute("user");
+    }
+
     List<Treatment> treatments =
             (List<Treatment>) request.getAttribute("treatments");
 
@@ -15,342 +20,191 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Treatments - Sunrise Dental</title>
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
-            color: #333;
-        }
-
-        .header {
-            background: #ffffff;
-            padding: 20px 30px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: 22px;
-        }
-
-        .back {
-            text-decoration: none;
-            color: #2563eb;
-        }
-
-        .container {
-            padding: 30px;
-            max-width: 1200px;
-            margin: auto;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            margin-bottom: 25px;
-            border-radius: 10px;
-            border: 1px solid #e5e5e5;
-        }
-
-        .card h2 {
-            margin-bottom: 20px;
-        }
-
-        .search-form {
-            display: flex;
-            gap: 10px;
-        }
-
-        .search-form input {
-            flex: 1;
-            padding: 11px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        button {
-            padding: 11px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            background: #2563eb;
-            color: white;
-        }
-
-        .message {
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-        }
-
-        .error {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background: #f5f7fb;
-        }
-
-        .price {
-            font-weight: bold;
-        }
-
-        .status {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            background: #dcfce7;
-            color: #166534;
-            font-size: 13px;
-        }
-
-        .details-table {
-            margin-top: 0;
-        }
-
-        .details-table th {
-            width: 220px;
-        }
-
-        @media (max-width: 768px) {
-
-            .container {
-                padding: 15px;
-            }
-
-            .search-form {
-                flex-direction: column;
-            }
-
-            table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-
-        }
-
-    </style>
-
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/sunrise-theme.css">
 </head>
 
 <body>
 
 <header class="header">
+    <div class="header-inner">
+        <a class="brand" href="<%= request.getContextPath() %>/dashboard">
+            <img
+                src="<%= request.getContextPath() %>/assets/images/sunrise-dental-logo.png"
+                alt="Sunrise Dental Logo"
+                class="brand-logo"
+            >
+            <div>
+                <div class="brand-name">Sunrise Dental</div>
+                <div class="brand-subtitle">Management System</div>
+            </div>
+        </a>
 
-    <h1>Sunrise Dental - Treatments</h1>
-
-    <a class="back"
-       href="<%= request.getContextPath() %>/dashboard">
-        ← Dashboard
-    </a>
-
+        <div class="user-section">
+            <div class="user-info">
+                <div class="user-name"><%= user != null ? user.getFullName() : "User" %></div>
+                <div class="user-role"><%= user != null ? user.getRole() : "" %></div>
+            </div>
+            <a class="logout" href="<%= request.getContextPath() %>/logout">Logout</a>
+        </div>
+    </div>
 </header>
 
+<nav class="nav-bar">
+    <div class="nav-inner">
+        <a class="nav-link" href="<%= request.getContextPath() %>/dashboard">Dashboard</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/appointments">Appointments</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/patients">Patients</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/dentists">Dentists</a>
+        <a class="nav-link active" href="<%= request.getContextPath() %>/treatments">Treatments</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/bills">Billing</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/reports">Reports</a>
+    </div>
+</nav>
 
 <main class="container">
 
-
-    <!-- SEARCH -->
-
-    <div class="card">
-
-        <h2>Search Treatment</h2>
-
-        <form class="search-form"
-              method="get"
-              action="<%= request.getContextPath() %>/treatments">
-
-            <input
-                    type="text"
-                    name="treatmentCode"
-                    placeholder="Enter treatment code e.g. TRT-001"
-                    required>
-
-            <button type="submit">
-                Search
-            </button>
-
-        </form>
-
-
-        <% if (searchedTreatment != null) { %>
-
-            <table class="details-table">
-
-                <tr>
-                    <th>Treatment Code</th>
-                    <td>
-                        <%= searchedTreatment.getTreatmentCode() %>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>Treatment Name</th>
-                    <td>
-                        <%= searchedTreatment.getTreatmentName() %>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>Description</th>
-                    <td>
-                        <%= searchedTreatment.getDescription() %>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>Treatment Cost</th>
-                    <td class="price">
-                        Rs. <%= String.format(
-                                "%.2f",
-                                searchedTreatment.getTreatmentCost()
-                        ) %>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>Consultation Fee</th>
-                    <td class="price">
-                        Rs. <%= String.format(
-                                "%.2f",
-                                searchedTreatment.getConsultationFee()
-                        ) %>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>Status</th>
-                    <td>
-                        <span class="status">Active</span>
-                    </td>
-                </tr>
-
-            </table>
-
-        <% } else if (
-                request.getParameter("treatmentCode") != null) {
-        %>
-
-            <div class="message error">
-                No active treatment found with that treatment code.
-            </div>
-
-        <% } %>
-
+    <div class="page-header">
+        <div class="page-header-text">
+            <h1>Treatments</h1>
+            <p>Manage available dental treatments and pricing.</p>
+        </div>
+        <div class="page-header-actions">
+            <a class="back-link" href="<%= request.getContextPath() %>/dashboard">
+                &larr; Back to Dashboard
+            </a>
+        </div>
     </div>
 
-
-    <!-- ACTIVE TREATMENTS -->
-
-    <% if (treatments != null) { %>
-
-        <div class="card">
-
-            <h2>Available Treatments</h2>
-
-            <table>
-
-                <thead>
-
-                <tr>
-                    <th>Code</th>
-                    <th>Treatment</th>
-                    <th>Description</th>
-                    <th>Treatment Cost</th>
-                    <th>Consultation Fee</th>
-                    <th>Status</th>
-                </tr>
-
-                </thead>
-
-                <tbody>
-
-                <% for (Treatment treatment : treatments) { %>
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                <%= treatment.getTreatmentCode() %>
-                            </strong>
-                        </td>
-
-                        <td>
-                            <%= treatment.getTreatmentName() %>
-                        </td>
-
-                        <td>
-                            <%= treatment.getDescription() %>
-                        </td>
-
-                        <td class="price">
-                            Rs. <%= String.format(
-                                    "%.2f",
-                                    treatment.getTreatmentCost()
-                            ) %>
-                        </td>
-
-                        <td class="price">
-                            Rs. <%= String.format(
-                                    "%.2f",
-                                    treatment.getConsultationFee()
-                            ) %>
-                        </td>
-
-                        <td>
-                            <span class="status">
-                                Active
-                            </span>
-                        </td>
-
-                    </tr>
-
-                <% } %>
-
-                </tbody>
-
-            </table>
-
+    <!-- SEARCH TREATMENT -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Search Treatment</h2>
+                <p class="card-subtitle">Search by treatment code to lookup procedural pricing and fee schedules.</p>
+            </div>
         </div>
 
-    <% } %>
+        <form class="search-form" method="get" action="<%= request.getContextPath() %>/treatments">
+            <input
+                type="text"
+                name="treatmentCode"
+                placeholder="Enter treatment code (e.g. TRT-001)"
+                required
+            >
+            <button type="submit" class="btn btn-dark">Search Treatment</button>
+        </form>
 
+        <% if (searchedTreatment != null) { %>
+            <div style="margin-top: 24px;">
+                <div class="details-grid">
+                    <div class="detail-box">
+                        <div class="detail-label">Treatment Code</div>
+                        <div class="detail-value"><%= searchedTreatment.getTreatmentCode() %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Treatment Name</div>
+                        <div class="detail-value"><%= searchedTreatment.getTreatmentName() %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Treatment Cost</div>
+                        <div class="detail-value" style="color: var(--primary-dark);">
+                            Rs. <%= String.format("%,.2f", searchedTreatment.getTreatmentCost()) %>
+                        </div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Consultation Fee</div>
+                        <div class="detail-value">
+                            Rs. <%= String.format("%,.2f", searchedTreatment.getConsultationFee()) %>
+                        </div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value">
+                            <span class="status status-ACTIVE">Active</span>
+                        </div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value" style="font-weight: 500; font-size: 13px;">
+                            <%= searchedTreatment.getDescription() != null ? searchedTreatment.getDescription() : "-" %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } else if (request.getParameter("treatmentCode") != null) { %>
+            <div class="message error" style="margin-top: 20px; margin-bottom: 0;">
+                No active treatment found with that treatment code.
+            </div>
+        <% } %>
+    </div>
+
+    <!-- ACTIVE TREATMENTS -->
+    <% if (treatments != null) { %>
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Available Dental Treatments</h2>
+                    <p class="card-subtitle">Complete schedule of active clinical treatments and service fees.</p>
+                </div>
+            </div>
+
+            <% if (treatments.isEmpty()) { %>
+                <div class="empty-state">
+                    No active treatments available in the system.
+                </div>
+            <% } else { %>
+                <div class="table-container">
+                    <table class="app-table">
+                        <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Treatment</th>
+                            <th>Description</th>
+                            <th>Treatment Cost</th>
+                            <th>Consultation Fee</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <% for (Treatment treatment : treatments) { %>
+                            <tr>
+                                <td class="code-highlight">
+                                    <%= treatment.getTreatmentCode() %>
+                                </td>
+                                <td style="font-weight: 600;">
+                                    <%= treatment.getTreatmentName() %>
+                                </td>
+                                <td style="color: var(--muted); max-width: 320px; white-space: normal;">
+                                    <%= treatment.getDescription() != null ? treatment.getDescription() : "-" %>
+                                </td>
+                                <td class="price" style="color: var(--primary-dark);">
+                                    Rs. <%= String.format("%,.2f", treatment.getTreatmentCost()) %>
+                                </td>
+                                <td class="price">
+                                    Rs. <%= String.format("%,.2f", treatment.getConsultationFee()) %>
+                                </td>
+                                <td>
+                                    <span class="status status-ACTIVE">
+                                        Active
+                                    </span>
+                                </td>
+                            </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
+        </div>
+    <% } %>
 
 </main>
 
-</body>
+<footer class="footer">
+    Sunrise Dental Management System &bull; Professional Dental Care &amp; Clinical Operations
+</footer>
 
+</body>
 </html>

@@ -67,6 +67,7 @@
         <a class="nav-link" href="<%= request.getContextPath() %>/treatments">Treatments</a>
         <a class="nav-link" href="<%= request.getContextPath() %>/bills">Billing</a>
         <a class="nav-link" href="<%= request.getContextPath() %>/reports">Reports</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/help">Help</a>
     </div>
 </nav>
 

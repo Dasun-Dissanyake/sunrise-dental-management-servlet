@@ -23,23 +23,29 @@
     String success = request.getParameter("success");
 
     Map<Long, String> patientMap = new HashMap<>();
+    Map<Long, Patient> patientObjMap = new HashMap<>();
     if (patients != null) {
         for (Patient p : patients) {
             patientMap.put(p.getId(), p.getFullName() + " (" + p.getPatientNumber() + ")");
+            patientObjMap.put(p.getId(), p);
         }
     }
 
     Map<Long, String> dentistMap = new HashMap<>();
+    Map<Long, Dentist> dentistObjMap = new HashMap<>();
     if (dentists != null) {
         for (Dentist d : dentists) {
             dentistMap.put(d.getId(), d.getFullName() + " (" + d.getSpecialization() + ")");
+            dentistObjMap.put(d.getId(), d);
         }
     }
 
     Map<Long, String> treatmentMap = new HashMap<>();
+    Map<Long, Treatment> treatmentObjMap = new HashMap<>();
     if (treatments != null) {
         for (Treatment t : treatments) {
             treatmentMap.put(t.getId(), t.getTreatmentName() + " (" + t.getTreatmentCode() + ")");
+            treatmentObjMap.put(t.getId(), t);
         }
     }
 %>
@@ -87,6 +93,7 @@
         <a class="nav-link" href="<%= request.getContextPath() %>/treatments">Treatments</a>
         <a class="nav-link" href="<%= request.getContextPath() %>/bills">Billing</a>
         <a class="nav-link" href="<%= request.getContextPath() %>/reports">Reports</a>
+        <a class="nav-link" href="<%= request.getContextPath() %>/help">Help</a>
     </div>
 </nav>
 
@@ -230,7 +237,11 @@
             <button type="submit" class="btn btn-dark">Search Appointment</button>
         </form>
 
-        <% if (searchedAppointment != null) { %>
+        <% if (searchedAppointment != null) {
+            Patient searchedPatientObj = patientObjMap.get(searchedAppointment.getPatientId());
+            Dentist searchedDentistObj = dentistObjMap.get(searchedAppointment.getDentistId());
+            Treatment searchedTreatmentObj = treatmentObjMap.get(searchedAppointment.getTreatmentId());
+        %>
             <div style="margin-top: 24px;">
                 <div class="details-grid">
                     <div class="detail-box">
@@ -238,16 +249,24 @@
                         <div class="detail-value"><%= searchedAppointment.getAppointmentNumber() %></div>
                     </div>
                     <div class="detail-box">
-                        <div class="detail-label">Patient</div>
-                        <div class="detail-value"><%= patientMap.getOrDefault(searchedAppointment.getPatientId(), "Patient ID: " + searchedAppointment.getPatientId()) %></div>
+                        <div class="detail-label">Patient Name</div>
+                        <div class="detail-value"><%= searchedPatientObj != null ? searchedPatientObj.getFullName() : ("ID: " + searchedAppointment.getPatientId()) %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Patient Number</div>
+                        <div class="detail-value"><%= searchedPatientObj != null ? searchedPatientObj.getPatientNumber() : "-" %></div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Contact Number</div>
+                        <div class="detail-value"><%= searchedPatientObj != null && searchedPatientObj.getContactNumber() != null ? searchedPatientObj.getContactNumber() : "-" %></div>
                     </div>
                     <div class="detail-box">
                         <div class="detail-label">Dentist</div>
-                        <div class="detail-value"><%= dentistMap.getOrDefault(searchedAppointment.getDentistId(), "Dentist ID: " + searchedAppointment.getDentistId()) %></div>
+                        <div class="detail-value"><%= searchedDentistObj != null ? searchedDentistObj.getFullName() + " (" + searchedDentistObj.getSpecialization() + ")" : ("ID: " + searchedAppointment.getDentistId()) %></div>
                     </div>
                     <div class="detail-box">
                         <div class="detail-label">Treatment</div>
-                        <div class="detail-value"><%= treatmentMap.getOrDefault(searchedAppointment.getTreatmentId(), "Treatment ID: " + searchedAppointment.getTreatmentId()) %></div>
+                        <div class="detail-value"><%= searchedTreatmentObj != null ? searchedTreatmentObj.getTreatmentName() + " (" + searchedTreatmentObj.getTreatmentCode() + ")" : ("ID: " + searchedAppointment.getTreatmentId()) %></div>
                     </div>
                     <div class="detail-box">
                         <div class="detail-label">Date &amp; Time</div>
@@ -262,7 +281,13 @@
                         </div>
                     </div>
                     <div class="detail-box full" style="grid-column: 1 / -1;">
-                        <div class="detail-label">Notes</div>
+                        <div class="detail-label">Patient Residential Address</div>
+                        <div class="detail-value" style="font-weight: 500; font-size: 13px;">
+                            <%= searchedPatientObj != null && searchedPatientObj.getAddress() != null ? searchedPatientObj.getAddress() : "-" %>
+                        </div>
+                    </div>
+                    <div class="detail-box full" style="grid-column: 1 / -1;">
+                        <div class="detail-label">Clinical Notes</div>
                         <div class="detail-value" style="font-weight: 500; font-size: 13px;">
                             <%= searchedAppointment.getNotes() != null && !searchedAppointment.getNotes().isEmpty() ? searchedAppointment.getNotes() : "No notes recorded" %>
                         </div>

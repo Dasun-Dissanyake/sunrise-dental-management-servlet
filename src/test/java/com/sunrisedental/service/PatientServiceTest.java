@@ -64,6 +64,31 @@ class PatientServiceTest {
         );
     }
 
+    @Test
+    void shouldRejectDuplicatePatientNumber() {
+        com.sunrisedental.dao.PatientDAO stubDAO = new com.sunrisedental.dao.PatientDAO() {
+            @Override
+            public Patient findByPatientNumber(String num) {
+                if ("PAT-EXISTING".equals(num)) {
+                    Patient p = new Patient();
+                    p.setId(5L);
+                    p.setPatientNumber("PAT-EXISTING");
+                    return p;
+                }
+                return null;
+            }
+        };
+
+        PatientService service = new PatientService(stubDAO);
+        Patient patient = createValidPatient();
+        patient.setPatientNumber("PAT-EXISTING");
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.registerPatient(patient)
+        );
+    }
+
     private Patient createValidPatient() {
 
         Patient patient = new Patient();

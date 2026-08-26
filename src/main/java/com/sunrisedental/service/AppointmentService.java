@@ -68,6 +68,19 @@ public class AppointmentService {
     public boolean registerAppointment(Appointment appointment) throws SQLException {
         validateAppointment(appointment);
 
+        Appointment existing = appointmentDAO.findByAppointmentNumber(appointment.getAppointmentNumber().trim());
+        if (existing != null) {
+            throw new IllegalArgumentException("An appointment with this number already exists.");
+        }
+
+        if (appointmentDAO.hasDentistScheduleConflict(
+                appointment.getDentistId(),
+                appointment.getAppointmentDate(),
+                appointment.getAppointmentTime(),
+                null)) {
+            throw new IllegalArgumentException("The selected dentist already has an appointment booked at this date and time.");
+        }
+
         if (appointment.getCreatedAt() == null) {
             appointment.setCreatedAt(LocalDateTime.now());
         }
@@ -128,6 +141,16 @@ public class AppointmentService {
         }
 
         validateAppointment(appointment);
+
+        if (!"CANCELLED".equalsIgnoreCase(appointment.getStatus())) {
+            if (appointmentDAO.hasDentistScheduleConflict(
+                    appointment.getDentistId(),
+                    appointment.getAppointmentDate(),
+                    appointment.getAppointmentTime(),
+                    appointment.getId())) {
+                throw new IllegalArgumentException("The selected dentist already has another appointment booked at this date and time.");
+            }
+        }
 
         appointment.setUpdatedAt(LocalDateTime.now());
 

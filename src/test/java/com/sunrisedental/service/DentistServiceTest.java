@@ -72,6 +72,31 @@ class DentistServiceTest {
         );
     }
 
+    @Test
+    void shouldRejectDuplicateDentistNumber() {
+        com.sunrisedental.dao.DentistDAO stubDAO = new com.sunrisedental.dao.DentistDAO() {
+            @Override
+            public Dentist findByDentistNumber(String num) {
+                if ("D001-EXISTING".equals(num)) {
+                    Dentist d = new Dentist();
+                    d.setId(2L);
+                    d.setDentistNumber("D001-EXISTING");
+                    return d;
+                }
+                return null;
+            }
+        };
+
+        DentistService dentistService = new DentistService(stubDAO);
+        Dentist dentist = createValidDentist();
+        dentist.setDentistNumber("D001-EXISTING");
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> dentistService.addDentist(dentist)
+        );
+    }
+
     private Dentist createValidDentist() {
         Dentist dentist = new Dentist();
         dentist.setDentistNumber("D001");

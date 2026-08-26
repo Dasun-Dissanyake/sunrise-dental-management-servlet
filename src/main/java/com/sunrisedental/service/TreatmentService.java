@@ -25,6 +25,17 @@ public class TreatmentService {
 
         validateTreatment(treatment);
 
+        Treatment existing =
+                treatmentDAO.findByTreatmentCode(
+                        treatment.getTreatmentCode().trim()
+                );
+
+        if (existing != null) {
+            throw new IllegalArgumentException(
+                    "A treatment with this treatment code already exists."
+            );
+        }
+
         treatment.setCreatedAt(
                 LocalDateTime.now()
         );

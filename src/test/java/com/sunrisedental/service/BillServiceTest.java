@@ -173,4 +173,34 @@ class BillServiceTest {
                 () -> service.generateBill(newBill)
         );
     }
+
+    @Test
+    void shouldPreventDuplicateBillNumber() {
+        Bill existingBill = new Bill();
+        existingBill.setId(1L);
+        existingBill.setBillNumber("BILL-DUP-01");
+        existingBill.setAppointmentId(10L);
+
+        BillDAO dao = new BillDAO() {
+            @Override
+            public Bill findByBillNumber(String num) {
+                if ("BILL-DUP-01".equals(num)) {
+                    return existingBill;
+                }
+                return null;
+            }
+        };
+
+        BillService service = new BillService(dao);
+        Bill newBill = new Bill();
+        newBill.setBillNumber("BILL-DUP-01");
+        newBill.setAppointmentId(20L);
+        newBill.setConsultationFee(500.00);
+        newBill.setTreatmentCost(1000.00);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.generateBill(newBill)
+        );
+    }
 }

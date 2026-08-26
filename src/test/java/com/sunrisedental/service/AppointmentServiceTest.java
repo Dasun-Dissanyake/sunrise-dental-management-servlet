@@ -110,4 +110,65 @@ public class AppointmentServiceTest {
         );
         assertEquals("Valid appointment ID is required.", ex.getMessage());
     }
+
+    @Test
+    public void testRegisterAppointment_duplicateNumberThrowsException() {
+        com.sunrisedental.dao.AppointmentDAO stubDAO = new com.sunrisedental.dao.AppointmentDAO() {
+            @Override
+            public Appointment findByAppointmentNumber(String num) {
+                if ("APP-DUP-01".equals(num)) {
+                    Appointment a = new Appointment();
+                    a.setId(10L);
+                    a.setAppointmentNumber("APP-DUP-01");
+                    return a;
+                }
+                return null;
+            }
+        };
+
+        AppointmentService service = new AppointmentService(stubDAO);
+        Appointment appointment = new Appointment();
+        appointment.setAppointmentNumber("APP-DUP-01");
+        appointment.setAppointmentDate(LocalDate.now().plusDays(1));
+        appointment.setAppointmentTime(LocalTime.of(10, 0));
+        appointment.setPatientId(1L);
+        appointment.setDentistId(1L);
+        appointment.setTreatmentId(1L);
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.registerAppointment(appointment)
+        );
+        assertEquals("An appointment with this number already exists.", ex.getMessage());
+    }
+
+    @Test
+    public void testRegisterAppointment_dentistScheduleConflictThrowsException() {
+        com.sunrisedental.dao.AppointmentDAO stubDAO = new com.sunrisedental.dao.AppointmentDAO() {
+            @Override
+            public Appointment findByAppointmentNumber(String num) {
+                return null;
+            }
+
+            @Override
+            public boolean hasDentistScheduleConflict(Long dentistId, LocalDate date, LocalTime time, Long excludeAppointmentId) {
+                return true;
+            }
+        };
+
+        AppointmentService service = new AppointmentService(stubDAO);
+        Appointment appointment = new Appointment();
+        appointment.setAppointmentNumber("APP-NEW-01");
+        appointment.setAppointmentDate(LocalDate.now().plusDays(1));
+        appointment.setAppointmentTime(LocalTime.of(10, 0));
+        appointment.setPatientId(1L);
+        appointment.setDentistId(1L);
+        appointment.setTreatmentId(1L);
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.registerAppointment(appointment)
+        );
+        assertEquals("The selected dentist already has an appointment booked at this date and time.", ex.getMessage());
+    }
 }

@@ -85,6 +85,11 @@ public class DentistService {
     public boolean addDentist(Dentist dentist) throws SQLException {
         validateDentist(dentist);
 
+        Dentist existing = dentistDAO.findByDentistNumber(dentist.getDentistNumber().trim());
+        if (existing != null) {
+            throw new IllegalArgumentException("A dentist with this dentist number already exists.");
+        }
+
         if (dentist.getCreatedAt() == null) {
             dentist.setCreatedAt(LocalDateTime.now());
         }

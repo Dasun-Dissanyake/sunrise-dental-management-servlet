@@ -23,6 +23,18 @@ public class BillService {
 
         validateBill(bill);
 
+        // Prevent duplicate bill number
+        Bill existingBillNumber =
+                billDAO.findByBillNumber(
+                        bill.getBillNumber().trim()
+                );
+
+        if (existingBillNumber != null) {
+            throw new IllegalArgumentException(
+                    "A bill with this bill number already exists."
+            );
+        }
+
         // Prevent more than one bill for the same appointment
         Bill existingBill =
                 billDAO.findByAppointmentId(

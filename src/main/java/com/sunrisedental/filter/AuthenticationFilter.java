@@ -15,13 +15,16 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 @WebFilter(urlPatterns = {
-        "/pages/dashboard.html",
-        "/pages/appointments/*",
-        "/pages/patients/*",
-        "/pages/dentists/*",
-        "/pages/treatments/*",
-        "/pages/billing/*",
-        "/pages/reports/*"
+        "/dashboard",
+        "/appointments",
+        "/patients",
+        "/dentists",
+        "/treatments",
+        "/bills",
+        "/reports",
+        "/reports/*",
+        "/help",
+        "/pages/*"
 })
 public class AuthenticationFilter implements Filter {
 
@@ -37,6 +40,16 @@ public class AuthenticationFilter implements Filter {
 
         HttpServletResponse httpResponse =
                 (HttpServletResponse) response;
+
+        String uri = httpRequest.getRequestURI();
+        String contextPath = httpRequest.getContextPath();
+        String path = uri.substring(contextPath.length());
+
+        // Allow login page and login servlet without authentication
+        if (path.equals("/pages/login.html") || path.equals("/login")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         HttpSession session =
                 httpRequest.getSession(false);

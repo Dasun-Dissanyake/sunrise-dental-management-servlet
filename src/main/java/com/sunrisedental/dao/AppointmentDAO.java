@@ -168,6 +168,33 @@ public class AppointmentDAO {
         }
     }
 
+    public boolean hasDentistScheduleConflict(Long dentistId, LocalDate date, LocalTime time, Long excludeAppointmentId) throws SQLException {
+        String sql = """
+                SELECT id
+                FROM appointments
+                WHERE dentist_id = ?
+                  AND appointment_date = ?
+                  AND appointment_time = ?
+                  AND status != 'CANCELLED'
+                """ + (excludeAppointmentId != null ? " AND id != ?" : "");
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setLong(1, dentistId);
+            statement.setDate(2, Date.valueOf(date));
+            statement.setTime(3, Time.valueOf(time));
+
+            if (excludeAppointmentId != null) {
+                statement.setLong(4, excludeAppointmentId);
+            }
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        }
+    }
+
     private Appointment mapResultSetToAppointment(ResultSet resultSet) throws SQLException {
         Appointment appointment = new Appointment();
 

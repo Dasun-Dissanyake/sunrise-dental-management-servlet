@@ -16,10 +16,25 @@ public class PatientService {
         this.patientDAO = new PatientDAO();
     }
 
+    public PatientService(PatientDAO patientDAO) {
+        this.patientDAO = patientDAO;
+    }
+
     public boolean registerPatient(Patient patient)
             throws SQLException {
 
         validatePatient(patient);
+
+        Patient existing =
+                patientDAO.findByPatientNumber(
+                        patient.getPatientNumber().trim()
+                );
+
+        if (existing != null) {
+            throw new IllegalArgumentException(
+                    "A patient with this patient number already exists."
+            );
+        }
 
         patient.setRegistrationDate(
                 LocalDateTime.now()

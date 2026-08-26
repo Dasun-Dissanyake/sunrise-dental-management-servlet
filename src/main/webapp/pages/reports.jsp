@@ -115,6 +115,9 @@
         <a class="nav-link" href="<%= request.getContextPath() %>/bills">Billing</a>
         <a class="nav-link active" href="<%= request.getContextPath() %>/reports">Reports</a>
         <a class="nav-link" href="<%= request.getContextPath() %>/help">Help</a>
+        <% if (user != null && "ADMIN".equalsIgnoreCase(user.getRole())) { %>
+            <a class="nav-link" href="<%= request.getContextPath() %>/users">User Management</a>
+        <% } %>
     </div>
 </nav>
 

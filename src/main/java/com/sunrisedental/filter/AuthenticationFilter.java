@@ -24,6 +24,7 @@ import java.io.IOException;
         "/reports",
         "/reports/*",
         "/help",
+        "/users",
         "/pages/*"
 })
 public class AuthenticationFilter implements Filter {
@@ -69,6 +70,17 @@ public class AuthenticationFilter implements Filter {
             );
 
             return;
+        }
+
+        // Restrict User Management strictly to ADMIN role
+        if (path.equals("/users") || path.equals("/pages/users.jsp")) {
+            if (!"ADMIN".equalsIgnoreCase(loggedInUser.getRole())) {
+                httpResponse.sendRedirect(
+                        httpRequest.getContextPath()
+                                + "/dashboard?error=unauthorized"
+                );
+                return;
+            }
         }
 
         chain.doFilter(request, response);

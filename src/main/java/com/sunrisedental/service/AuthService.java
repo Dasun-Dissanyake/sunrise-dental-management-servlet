@@ -14,6 +14,10 @@ public class AuthService {
         this.userDAO = new UserDAO();
     }
 
+    public AuthService(UserDAO userDAO) {
+        this.userDAO = userDAO;
+    }
+
     public User authenticate(String username, String password) throws SQLException {
 
         if (username == null || username.isBlank()) {

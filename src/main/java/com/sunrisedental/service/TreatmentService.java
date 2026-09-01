@@ -93,7 +93,9 @@ public class TreatmentService {
             throws SQLException {
 
         if (id == null || id <= 0) {
-            return false;
+            throw new IllegalArgumentException(
+                    "Valid treatment ID is required."
+            );
         }
 
         return treatmentDAO.deactivate(id);

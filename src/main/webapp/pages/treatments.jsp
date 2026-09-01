@@ -14,6 +14,9 @@
 
     Treatment searchedTreatment =
             (Treatment) request.getAttribute("searchedTreatment");
+
+    String error = (String) request.getAttribute("error");
+    String success = request.getParameter("success");
 %>
 
 <!DOCTYPE html>
@@ -82,6 +85,102 @@
         </div>
     </div>
 
+    <% if (error != null) { %>
+        <div class="message error">
+            <%= error %>
+        </div>
+    <% } %>
+
+    <% if ("registered".equals(success) || "added".equals(success)) { %>
+        <div class="message success">
+            Treatment added successfully.
+        </div>
+    <% } else if ("deactivated".equals(success)) { %>
+        <div class="message success">
+            Treatment deactivated successfully.
+        </div>
+    <% } %>
+
+    <!-- ADD NEW TREATMENT -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Add New Treatment</h2>
+                <p class="card-subtitle">Create a new dental procedure with procedural pricing and consultation fee.</p>
+            </div>
+        </div>
+
+        <form method="post" action="<%= request.getContextPath() %>/treatments">
+            <input type="hidden" name="action" value="add">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="treatmentCode">Treatment Code <span class="required-indicator">*</span></label>
+                    <input
+                        type="text"
+                        id="treatmentCode"
+                        name="treatmentCode"
+                        required
+                        maxlength="50"
+                        placeholder="e.g. TRT-001"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="treatmentName">Treatment Name <span class="required-indicator">*</span></label>
+                    <input
+                        type="text"
+                        id="treatmentName"
+                        name="treatmentName"
+                        required
+                        maxlength="100"
+                        placeholder="e.g. Root Canal Treatment"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="treatmentCost">Treatment Cost (Rs.) <span class="required-indicator">*</span></label>
+                    <input
+                        type="number"
+                        id="treatmentCost"
+                        name="treatmentCost"
+                        required
+                        step="0.01"
+                        min="0"
+                        placeholder="e.g. 15000.00"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="consultationFee">Consultation Fee (Rs.) <span class="required-indicator">*</span></label>
+                    <input
+                        type="number"
+                        id="consultationFee"
+                        name="consultationFee"
+                        required
+                        step="0.01"
+                        min="0"
+                        placeholder="e.g. 2000.00"
+                    >
+                </div>
+
+                <div class="form-group full" style="grid-column: 1 / -1;">
+                    <label for="description">Description</label>
+                    <input
+                        type="text"
+                        id="description"
+                        name="description"
+                        maxlength="500"
+                        placeholder="Optional description of clinical procedure"
+                    >
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add Treatment</button>
+            </div>
+        </form>
+    </div>
+
     <!-- SEARCH TREATMENT -->
     <div class="card">
         <div class="card-header">
@@ -127,7 +226,9 @@
                     <div class="detail-box">
                         <div class="detail-label">Status</div>
                         <div class="detail-value">
-                            <span class="status status-ACTIVE">Active</span>
+                            <span class="status <%= searchedTreatment.isActive() ? "status-ACTIVE" : "status-INACTIVE" %>">
+                                <%= searchedTreatment.isActive() ? "Active" : "Inactive" %>
+                            </span>
                         </div>
                     </div>
                     <div class="detail-box">
@@ -137,6 +238,20 @@
                         </div>
                     </div>
                 </div>
+
+                <% if (searchedTreatment.isActive()) { %>
+                    <div class="edit-section">
+                        <h3>Deactivate Treatment</h3>
+                        <p style="color: var(--muted); font-size: 13px; margin-bottom: 14px;">
+                            Deactivating will mark this treatment as inactive and remove it from appointment booking.
+                        </p>
+                        <form method="post" action="<%= request.getContextPath() %>/treatments" onsubmit="return confirm('Are you sure you want to deactivate this treatment?');">
+                            <input type="hidden" name="action" value="deactivate">
+                            <input type="hidden" name="id" value="<%= searchedTreatment.getId() %>">
+                            <button type="submit" class="btn btn-danger">Deactivate Treatment</button>
+                        </form>
+                    </div>
+                <% } %>
             </div>
         <% } else if (request.getParameter("treatmentCode") != null) { %>
             <div class="message error" style="margin-top: 20px; margin-bottom: 0;">
@@ -170,6 +285,7 @@
                             <th>Treatment Cost</th>
                             <th>Consultation Fee</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -194,6 +310,18 @@
                                     <span class="status status-ACTIVE">
                                         Active
                                     </span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <a class="action-link" href="<%= request.getContextPath() %>/treatments?treatmentCode=<%= treatment.getTreatmentCode() %>">
+                                            View
+                                        </a>
+                                        <form method="post" action="<%= request.getContextPath() %>/treatments" style="display: inline;" onsubmit="return confirm('Are you sure you want to deactivate this treatment?');">
+                                            <input type="hidden" name="action" value="deactivate">
+                                            <input type="hidden" name="id" value="<%= treatment.getId() %>">
+                                            <button type="submit" class="btn btn-danger btn-sm" style="padding: 4px 10px; font-size: 12px; cursor: pointer;">Deactivate</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         <% } %>

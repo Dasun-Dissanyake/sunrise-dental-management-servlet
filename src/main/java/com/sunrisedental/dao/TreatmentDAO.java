@@ -209,7 +209,6 @@ public class TreatmentDAO {
                 UPDATE treatments
                 SET active = false
                 WHERE id = ?
-                AND active = true
                 """;
 
         try (Connection connection = DatabaseConnection.getConnection();

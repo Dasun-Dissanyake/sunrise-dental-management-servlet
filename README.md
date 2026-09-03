@@ -81,7 +81,22 @@ The system uses a MySQL relational database containing the following main tables
 * `appointments`
 * `bills`
 
-Foreign keys and database constraints are used to maintain data integrity and relationships between entities.
+## Web Service / API
+
+The system provides a REST-style appointment web service implemented using Jakarta Servlets (`AppointmentApiServlet`). The API communicates over HTTP and returns JSON responses, following the system's existing layered architecture (`Servlet -> Service -> DAO -> JDBC -> MySQL`).
+
+### Endpoints
+
+* `GET /api/appointments` – Returns a JSON array of all registered appointments.
+* `GET /api/appointments/{id}` – Returns the JSON details of a specific appointment by its unique identifier.
+
+### Response Status Codes
+
+* `200 OK` – Request succeeded; returns requested appointment data.
+* `400 Bad Request` – Invalid appointment ID format or non-positive identifier.
+* `401 Unauthorized` – Unauthenticated API access attempt.
+* `404 Not Found` – Requested appointment does not exist.
+* `500 Internal Server Error` – Database or server error during request processing.
 
 ## Security
 
@@ -100,7 +115,7 @@ Automated tests were implemented using JUnit and Mockito to verify service and s
 
 The final test execution completed successfully with:
 
-**106 tests – 0 failures – 0 errors – 0 skipped**
+**114 tests – 0 failures – 0 errors – 0 skipped**
 
 ## Project Structure
 

@@ -25,7 +25,8 @@ import java.io.IOException;
         "/reports/*",
         "/help",
         "/users",
-        "/pages/*"
+        "/pages/*",
+        "/api/*"
 })
 public class AuthenticationFilter implements Filter {
 
@@ -63,6 +64,13 @@ public class AuthenticationFilter implements Filter {
         }
 
         if (loggedInUser == null) {
+            if (path.startsWith("/api/")) {
+                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                httpResponse.setContentType("application/json");
+                httpResponse.setCharacterEncoding("UTF-8");
+                httpResponse.getWriter().write("{\"status\":401,\"error\":\"Unauthorized access. Authentication is required.\"}");
+                return;
+            }
 
             httpResponse.sendRedirect(
                     httpRequest.getContextPath()
